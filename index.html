@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>CrowdPic - Share & Earn</title>
+    <title>CrowdPic - Share & Earn | Premium Photography</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -31,6 +31,61 @@
         .stat-number { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
         .profile-pic-overlay { position: relative; display: inline-block; cursor: pointer; }
         .edit-icon { position: absolute; bottom: 5px; right: 5px; background: #6C63FF; border-radius: 50%; padding: 6px; color: white; font-size: 12px; border: 2px solid white; }
+        
+        /* Enhanced fullscreen loading overlay for modal image preview */
+        .image-loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            border-radius: 24px;
+        }
+        .modal-skeleton {
+            background: #1a1a2e;
+            border-radius: 28px;
+            animation: pulse 1.4s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .full-img-hidden {
+            display: none;
+        }
+        .full-img-visible {
+            display: block;
+        }
+        .skeleton-loader {
+            background: linear-gradient(90deg, #2d2d44 25%, #3a3a55 50%, #2d2d44 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .post-image-wrapper {
+            position: relative;
+            background: #eef2ff;
+        }
+        .post-skeleton {
+            position: absolute;
+            inset: 0;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            transition: opacity 0.2s;
+        }
+        .post-card img {
+            transition: opacity 0.25s ease;
+        }
     </style>
 </head>
 <body>
@@ -136,6 +191,9 @@
             </div>
             <p class="text-xs text-gray-400 mt-3">Click on profile picture to change</p>
         </div>
+        <div class="flex justify-end mb-4">
+            <button onclick="checkAuthAndGo('uploadScreen')" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-md flex items-center gap-2 transition hover:scale-105"><i class="fas fa-plus-circle"></i> Add New Post</button>
+        </div>
         <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-images text-purple-500"></i> My Uploads</h3>
         <div id="myPostsGrid" class="masonry-grid"></div>
     </section>
@@ -178,9 +236,17 @@
 
     <section id="postDetail" class="hidden">
         <div onclick="showScreen('homeScreen')" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Feed</div>
-        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden grid md:grid-cols-2 gap-0">
-            <div class="bg-black/5 flex items-center justify-center min-h-[380px] p-4">
-                <img id="detailImg" class="max-h-[70vh] w-full object-contain rounded-xl">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden grid md:grid-cols-2 gap-0 relative">
+            <!-- LEFT: Image container with loading skeleton & brand placeholder -->
+            <div class="bg-black/5 flex items-center justify-center min-h-[420px] p-4 relative" id="detailImageContainer">
+                <div id="detailLoaderSkeleton" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/95 z-20 rounded-l-2xl backdrop-blur-md">
+                    <div class="w-20 h-20 mb-4 rounded-full bg-white/20 animate-pulse flex items-center justify-center">
+                        <i class="fas fa-camera-retro text-white text-4xl opacity-80"></i>
+                    </div>
+                    <div class="h-2 w-32 bg-white/30 rounded-full animate-pulse mb-2"></div>
+                    <p class="text-white/70 text-sm font-mono">Loading masterpiece...</p>
+                </div>
+                <img id="detailImg" class="max-h-[70vh] w-full object-contain rounded-xl opacity-0 transition-opacity duration-300" style="display: none;">
             </div>
             <div class="p-6 md:p-8 flex flex-col justify-between">
                 <div>
@@ -247,47 +313,63 @@
         }, 2500);
     }
 
-    // ENHANCED: Direct gallery download - works on all modern devices including iOS and Android
+    // Enhanced image loader with brand logo + loading skeleton
+    async function loadImageWithSkeleton(imgElement, imageUrl) {
+        const container = document.getElementById('detailImageContainer');
+        const loaderDiv = document.getElementById('detailLoaderSkeleton');
+        if(!loaderDiv) return;
+        loaderDiv.style.display = 'flex';
+        imgElement.style.display = 'none';
+        imgElement.classList.add('opacity-0');
+        
+        // Reset image
+        imgElement.src = imageUrl;
+        if(imgElement.complete) {
+            finalizeImageLoad(imgElement, loaderDiv);
+        } else {
+            imgElement.onload = () => finalizeImageLoad(imgElement, loaderDiv);
+            imgElement.onerror = () => {
+                showFastToast("Failed to load high-res image", true);
+                loaderDiv.style.display = 'none';
+                imgElement.style.display = 'block';
+            };
+        }
+    }
+    
+    function finalizeImageLoad(imgElement, loaderDiv) {
+        loaderDiv.style.display = 'none';
+        imgElement.style.display = 'block';
+        setTimeout(() => imgElement.classList.add('opacity-100'), 30);
+        imgElement.classList.remove('opacity-0');
+    }
+
+    // Gallery download with blob support
     window.triggerDirectDownload = async () => {
         if (!activePost) return;
-        
         const downloadBtn = document.getElementById('downloadDetailBtn');
         const originalText = downloadBtn.innerHTML;
         downloadBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
         downloadBtn.disabled = true;
-        
         try {
-            // Fetch image as blob
             const response = await fetch(activePost.url);
-            if (!response.ok) throw new Error('Network response failed');
+            if (!response.ok) throw new Error('Network failed');
             const blob = await response.blob();
-            
-            // Create blob URL
             const blobUrl = URL.createObjectURL(blob);
-            
-            // Method 1: Standard anchor download (works on most browsers)
             const link = document.createElement('a');
             link.href = blobUrl;
             link.download = `CrowdPic_${activePost.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.jpg`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            // Clean up blob URL
             setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
-            
-            // Update download stats
             await updateDoc(doc(db, "posts", activePost.id), { downloads: increment(1) });
             await updateDoc(doc(db, "users", activePost.publisherId), { earnings: increment(0.01), downloads: increment(1) });
-            
             if (auth.currentUser && auth.currentUser.uid === activePost.publisherId) {
                 const refreshUser = await getDoc(doc(db, "users", activePost.publisherId));
                 userData = refreshUser.data();
             }
-            
             showFastToast("Image saved to gallery successfully");
         } catch (error) {
-            console.error("Download error:", error);
             showFastToast("Download failed. Please try again.", true);
         } finally {
             downloadBtn.innerHTML = originalText;
@@ -391,7 +473,7 @@
         document.getElementById('userName').innerText = userData.name;
         document.getElementById('userDp').src = userData.photo;
         
-        const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
+        const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid), orderBy("createdAt", "desc"));
         const snap = await getDocs(q);
         let totalLikes = 0;
         let totalImpressions = 0;
@@ -403,7 +485,7 @@
             totalImpressions += (p.impressions || 0);
             const cardDiv = document.createElement('div');
             cardDiv.className = 'post-card relative';
-            cardDiv.innerHTML = `<button class="delete-btn" onclick="window.deleteMyPost('${d.id}')">Delete</button><img src="${p.url}" class="w-full"><div class="p-2 text-xs text-gray-500 flex justify-between"><span>Likes ${p.likes || 0}</span><span>Views ${p.impressions || 0}</span></div>`;
+            cardDiv.innerHTML = `<button class="delete-btn" onclick="window.deleteMyPost('${d.id}')">Delete</button><img src="${p.url}" class="w-full"><div class="p-2 text-xs text-gray-500 flex justify-between"><span><i class="fas fa-heart text-red-400"></i> ${p.likes || 0}</span><span><i class="fas fa-eye"></i> ${p.impressions || 0}</span></div>`;
             grid.appendChild(cardDiv);
         });
         document.getElementById('statTotalLikes').innerText = totalLikes;
@@ -432,7 +514,7 @@
                 hasAny = true;
                 const card = document.createElement('div');
                 card.className = 'post-card';
-                card.innerHTML = `<img src="${p.url}" class="w-full" loading="lazy"><div class="p-3"><p class="font-bold text-sm truncate">${p.title}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${p.publisherName}</span><span>Likes ${p.likes || 0}</span></div></div>`;
+                card.innerHTML = `<div class="post-image-wrapper relative"><img src="${p.url}" class="w-full" loading="lazy"><div class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center" style="z-index:-1"><i class="fas fa-image text-gray-400 text-3xl"></i></div></div><div class="p-3"><p class="font-bold text-sm truncate">${p.title}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${p.publisherName}</span><span><i class="fas fa-heart text-pink-400"></i> ${p.likes || 0}</span></div></div>`;
                 card.onclick = () => openDetail(p);
                 container.appendChild(card);
             }
@@ -445,7 +527,14 @@
         await updateDoc(doc(db, "posts", post.id), { impressions: increment(1) });
         const updatedPostSnap = await getDoc(doc(db, "posts", post.id));
         const freshPost = updatedPostSnap.data();
-        document.getElementById('detailImg').src = post.url;
+        // Show brand skeleton loader while image loads
+        const imgElement = document.getElementById('detailImg');
+        const loaderDiv = document.getElementById('detailLoaderSkeleton');
+        if(loaderDiv) loaderDiv.style.display = 'flex';
+        imgElement.style.display = 'none';
+        imgElement.src = post.url;
+        loadImageWithSkeleton(imgElement, post.url);
+        
         document.getElementById('detailTitle').innerText = post.title;
         document.getElementById('detailUserName').innerText = post.publisherName;
         document.getElementById('detailUserDp').src = post.publisherDp;
@@ -467,7 +556,7 @@
         showScreen('postDetail');
     };
 
-    window.toggleLike = async () => {
+    window.toggleLike = async () => { /* same as original but stable */ 
         if(!auth.currentUser) { openAuthModal(); return; }
         const btn = document.getElementById('likeBtn');
         const isLiked = btn.classList.contains('like-active');
@@ -487,15 +576,11 @@
             userData = freshUser.data();
         } catch(e) { console.error(e); }
     };
-
-    window.previewUpload = (input) => {
-        if(input.files[0]) {
-            selectedFile = input.files[0];
-            document.getElementById('uploadImgPreview').src = URL.createObjectURL(selectedFile);
-            document.getElementById('uploadImgPreview').classList.remove('hidden');
-            document.getElementById('uploadPlaceholder').classList.add('hidden');
-        }
-    };
+    window.previewUpload = (input) => { if(input.files[0]) { selectedFile = input.files[0]; document.getElementById('uploadImgPreview').src = URL.createObjectURL(selectedFile); document.getElementById('uploadImgPreview').classList.remove('hidden'); document.getElementById('uploadPlaceholder').classList.add('hidden'); } };
+    window.startUpload = async () => { /* unchanged core */ };
+    window.setMethod = (m) => { withdrawMethod = m; document.getElementById('selEasypaisa').style.borderColor = m === 'Easypaisa' ? '#6C63FF' : '#e5e7eb'; document.getElementById('selJazzcash').style.borderColor = m === 'Jazzcash' ? '#6C63FF' : '#e5e7eb'; };
+    window.requestWithdraw = () => { const name = document.getElementById('wdName').value, num = document.getElementById('wdNumber').value; if(!withdrawMethod || !name || !num) return showFastToast("Fill all fields", true); if(!userData || userData.earnings < 30) return showFastToast("Minimum $30 required to withdraw", true); showFastToast("Withdrawal request submitted (24-48h)"); };
+    window.copyShareLink = () => { navigator.clipboard.writeText(window.location.href); showFastToast("Link copied"); };
     window.startUpload = async () => {
         const title = document.getElementById('postTitle').value.trim();
         const tagsRaw = document.getElementById('postTags').value;
@@ -522,22 +607,6 @@
             document.getElementById('uploadPlaceholder').classList.remove('hidden');
             selectedFile = null;
         } catch(e) { showFastToast("Upload Error: "+e.message, true); } finally { btn.disabled = false; btn.innerText = "Publish & Earn"; }
-    };
-    window.setMethod = (m) => {
-        withdrawMethod = m;
-        document.getElementById('selEasypaisa').style.borderColor = m === 'Easypaisa' ? '#6C63FF' : '#e5e7eb';
-        document.getElementById('selJazzcash').style.borderColor = m === 'Jazzcash' ? '#6C63FF' : '#e5e7eb';
-    };
-    window.requestWithdraw = () => {
-        const name = document.getElementById('wdName').value;
-        const num = document.getElementById('wdNumber').value;
-        if(!withdrawMethod || !name || !num) return showFastToast("Fill all fields", true);
-        if(!userData || userData.earnings < 30) return showFastToast("Minimum $30 required to withdraw", true);
-        showFastToast("Withdrawal request submitted (24-48h)");
-    };
-    window.copyShareLink = () => {
-        navigator.clipboard.writeText(window.location.href);
-        showFastToast("Link copied");
     };
     document.getElementById('globalSearch').addEventListener('input', (e) => renderFeed(e.target.value));
     window.renderFeed();
