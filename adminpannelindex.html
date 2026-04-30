@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>CrowdPic Admin Suite | Full Control + Earnings Edit & Post Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+        body { background: #0a0a12; }
+        .admin-glass { background: rgba(16, 16, 28, 0.96); backdrop-filter: blur(12px); border-bottom: 1px solid #6C63FF40; }
+        .stat-card { background: linear-gradient(135deg, #14141f, #0c0c16); border: 1px solid #2a2a3a; transition: all 0.2s; }
+        .stat-card:hover { border-color: #6C63FF; transform: translateY(-3px); }
+        .table-wrapper { background: #12121c; border-radius: 1.25rem; overflow-x: auto; border: 1px solid #2a2a3a; }
+        th { background: #0a0a12; color: #a5b4fc; padding: 1rem; }
+        td { padding: 0.85rem 1rem; border-bottom: 1px solid #202030; color: #e2e8f0; }
+        tr:hover td { background: #1e1e2e; }
+        .badge-ban { background: #7f1a1a; color: #fecaca; border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 600; }
+        .badge-active { background: #14532d; color: #bbf7d0; }
+        .admin-btn-primary { background: linear-gradient(105deg, #6C63FF, #4a42d0); }
+        .toast-admin { position: fixed; bottom: 25px; right: 25px; background: #1e293b; backdrop-filter: blur(10px); z-index: 6000; border-left: 4px solid #6C63FF; }
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 9000; display: none; align-items: center; justify-content: center; }
+        .modal-card { background: #18182a; max-width: 550px; width: 90%; border-radius: 1.5rem; border: 1px solid #6C63FF; }
+        .withdraw-card { background: #0f0f1a; border: 1px solid #2d2d44; border-radius: 1rem; transition: 0.2s; }
+        .withdraw-card:hover { border-color: #6C63FF; background: #151528; }
+        .withdraw-status-pending { color: #fbbf24; }
+        .withdraw-status-approved { color: #4ade80; }
+        .withdraw-status-rejected { color: #f87171; }
+        input, select { background: #0a0a12; border: 1px solid #2d2d44; border-radius: 0.75rem; padding: 0.6rem 1rem; color: white; outline: none; transition: 0.2s; }
+        input:focus, select:focus { border-color: #6C63FF; }
+        .preview-img-modal { max-height: 70vh; object-fit: contain; border-radius: 1rem; }
+        .search-box { background: #0f0f1a; border: 1px solid #2d2d44; border-radius: 2rem; padding: 0.5rem 1rem; width: 260px; color: white; }
+        .inline-edit-earnings { background: #1a1a2e; border: 1px solid #6C63FF; border-radius: 10px; padding: 4px 8px; width: 90px; text-align: center; }
+    </style>
+</head>
+<body class="text-gray-200">
+
+<!-- LOGIN OVERLAY -->
+<div id="adminLoginOverlay" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 backdrop-blur-md">
+    <div class="bg-[#111122] rounded-2xl p-8 w-full max-w-md border border-purple-500/50 shadow-2xl">
+        <div class="text-center"><i class="fas fa-shield-haltered text-5xl text-purple-400 mb-2"></i><h2 class="text-2xl font-bold">Admin Console</h2><p class="text-gray-400 text-sm">Master access required</p></div>
+        <input type="password" id="adminPassInput" placeholder="Enter master password" class="w-full mt-6 bg-black/40 border-purple-500/50 rounded-xl p-3">
+        <button onclick="verifyAdminPassword()" class="w-full mt-5 admin-btn-primary py-3 rounded-xl font-bold text-white">Authenticate</button>
+        <p class="text-xs text-center text-gray-500 mt-4">🔐 Secure portal | Full Control v3</p>
+    </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="adminDashboard" class="hidden">
+    <nav class="admin-glass px-6 py-3 flex flex-wrap justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-2"><i class="fas fa-crown text-purple-400 text-2xl"></i><span class="font-bold text-xl">CrowdPic <span class="text-purple-400">ADMIN</span></span></div>
+        <div class="flex gap-4 items-center"><span class="bg-purple-900/40 px-3 py-1 rounded-full text-xs"><i class="fas fa-chart-line"></i> Live Control</span><button onclick="logoutAdmin()" class="bg-red-900/40 hover:bg-red-800/60 px-4 py-1.5 rounded-full text-sm"><i class="fas fa-lock"></i> Logout</button></div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-5 md:p-7">
+        <!-- STATS ROW -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div class="stat-card rounded-2xl p-4"><div class="text-gray-400 text-sm">👥 Users</div><p class="text-2xl font-bold" id="statTotalUsers">0</p></div>
+            <div class="stat-card rounded-2xl p-4"><div class="text-gray-400 text-sm">📸 Posts</div><p class="text-2xl font-bold" id="statTotalPosts">0</p></div>
+            <div class="stat-card rounded-2xl p-4"><div class="text-gray-400 text-sm">💰 Total Earned</div><p class="text-2xl font-bold text-green-400" id="statTotalEarnings">$0</p></div>
+            <div class="stat-card rounded-2xl p-4"><div class="text-gray-400 text-sm">📥 Downloads</div><p class="text-2xl font-bold" id="statTotalDownloads">0</p></div>
+            <div class="stat-card rounded-2xl p-4"><div class="text-gray-400 text-sm">⏳ Withdraw Pending</div><p class="text-2xl font-bold text-yellow-400" id="statPendingWithdrawals">0</p></div>
+        </div>
+
+        <!-- EARNING RATE CONTROLLER -->
+        <div class="bg-[#12121c] border border-purple-500/30 rounded-2xl p-5 mb-6 flex flex-wrap justify-between items-center gap-4">
+            <div><i class="fas fa-dollar-sign text-purple-400 mr-2"></i><span class="font-semibold">Earning Per Download (USD)</span><p class="text-xs text-gray-400">Affects future downloads</p></div>
+            <div class="flex gap-3 items-center"><input type="number" id="ratePerDownload" step="0.001" class="w-32 text-center" value="0.010"><button onclick="updateEarningRate()" class="admin-btn-primary px-5 py-2 rounded-xl text-sm font-bold"><i class="fas fa-save"></i> Update Rate</button></div>
+        </div>
+
+        <!-- TABS -->
+        <div class="flex flex-wrap gap-6 border-b border-gray-800 mb-6">
+            <button id="tabPosts" onclick="switchTab('posts')" class="pb-2 font-semibold text-purple-400 border-b-2 border-purple-400">📷 All Posts</button>
+            <button id="tabUsers" onclick="switchTab('users')" class="pb-2 font-semibold text-gray-400">👥 Users & Earnings Edit</button>
+            <button id="tabWithdraw" onclick="switchTab('withdraw')" class="pb-2 font-semibold text-gray-400">💸 Withdrawal Requests</button>
+            <button id="tabSettings" onclick="switchTab('settings')" class="pb-2 font-semibold text-gray-400">⚙️ Settings</button>
+        </div>
+
+        <!-- POSTS TABLE (with click preview) -->
+        <div id="postsPanel" class="table-wrapper">
+            <div class="p-3 border-b border-gray-700"><input type="text" id="postSearchInput" placeholder="🔍 Search posts by title, tags, publisher..." class="search-box w-full md:w-80"></div>
+            <table class="w-full"><thead><tr><th>Image</th><th>Title/Tags</th><th>Publisher</th><th>❤️</th><th>📥</th><th>👁️</th><th>Actions</th></tr></thead><tbody id="postsTableBody"><tr><td colspan="7" class="text-center py-8">Loading...</td></tr></tbody></table>
+        </div>
+
+        <!-- USERS TABLE with earnings edit + search -->
+        <div id="usersPanel" class="table-wrapper hidden">
+            <div class="p-3 border-b border-gray-700"><input type="text" id="userSearchInput" placeholder="🔍 Search by name or email..." class="search-box w-full md:w-80"></div>
+            <table class="w-full"><thead><tr><th>User</th><th>Email</th><th>💰 Earnings (Edit)</th><th>Posts</th><th>Status</th><th>Actions</th></tr></thead><tbody id="usersTableBody"><tr><td colspan="6" class="text-center py-8">Loading...</td></tr></tbody></table>
+        </div>
+
+        <!-- WITHDRAWAL REQUESTS PANEL -->
+        <div id="withdrawPanel" class="hidden"><div class="grid gap-4" id="withdrawRequestsContainer"><div class="text-center py-10 text-gray-400"><i class="fas fa-spinner fa-pulse"></i> Fetching requests...</div></div></div>
+
+        <!-- SETTINGS PANEL -->
+        <div id="settingsPanel" class="hidden bg-[#12121c] rounded-2xl p-6 border border-gray-700">
+            <h3 class="text-xl font-bold flex items-center gap-2"><i class="fas fa-sliders-h text-purple-400"></i> Global Moderation</h3>
+            <div class="grid md:grid-cols-2 gap-6 mt-5">
+                <div><label class="text-sm text-gray-300">Min. Withdrawal Amount ($)</label><input type="number" id="minWithdrawAmount" class="w-full mt-1" step="5" value="30"><button onclick="updateMinWithdraw()" class="mt-2 admin-btn-primary text-sm py-2 px-4 rounded-lg">Save</button></div>
+                <div><label class="text-sm text-gray-300">Max Upload Size (MB)</label><input type="number" id="maxUploadMB" class="w-full mt-1" value="10"><button onclick="updateGlobalSettings()" class="mt-2 admin-btn-primary text-sm py-2 px-4 rounded-lg">Apply</button></div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-gray-700"><p class="text-xs text-purple-300"><i class="fas fa-database"></i> Admin: click on any post image to preview before delete. Earnings editable inline.</p></div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL FOR POST PREVIEW -->
+<div id="postPreviewModal" class="modal-backdrop" style="display: none; align-items: center; justify-content: center;">
+    <div class="modal-card p-5 max-w-3xl w-full">
+        <div class="flex justify-between items-center mb-3"><h3 class="text-xl font-bold" id="previewTitle">Post Preview</h3><button onclick="closePreviewModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button></div>
+        <img id="previewImage" class="preview-img-modal w-full rounded-xl border border-purple-500" src="">
+        <div class="flex justify-end gap-3 mt-5"><button onclick="closePreviewModal()" class="px-4 py-2 bg-gray-700 rounded-xl">Close</button><button id="previewDeleteBtn" class="bg-red-600 px-5 py-2 rounded-xl font-bold">Delete This Post</button></div>
+    </div>
+</div>
+
+<div id="adminToast" class="toast-admin fixed bottom-5 right-5 opacity-0 transition-all duration-300 pointer-events-none rounded-full px-5 py-3 text-sm font-medium shadow-2xl"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAJ9gHtjhr_HkVizgzK2bjAEL4nNNrtsyA", 
+        authDomain: "crowdpic-b474a.firebaseapp.com", 
+        projectId: "crowdpic-b474a", 
+        storageBucket: "crowdpic-b474a.firebasestorage.app", 
+        messagingSenderId: "333394164466", 
+        appId: "1:333394164466:web:7c854a062acdb177426e6b" 
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let allPosts = [], allUsers = [], withdrawalRequests = [];
+    let currentTab = 'posts';
+    let currentPreviewPostId = null;
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    function showToast(msg, err=false) { 
+        let t = document.getElementById('adminToast'); 
+        t.innerText = msg; 
+        t.style.background = err ? "#b91c1c" : "#1e2a3a"; 
+        t.classList.remove('opacity-0'); 
+        t.classList.add('opacity-100'); 
+        setTimeout(() => { t.classList.remove('opacity-100'); t.classList.add('opacity-0'); }, 3000); 
+    }
+    
+    window.verifyAdminPassword = () => { 
+        if(document.getElementById('adminPassInput').value === "626277") { 
+            document.getElementById('adminLoginOverlay').classList.add('hidden'); 
+            document.getElementById('adminDashboard').classList.remove('hidden'); 
+            showToast("Access Granted. Full Control Active."); 
+            refreshAllData(); 
+        } else showToast("Wrong password!", true); 
+    };
+    
+    window.logoutAdmin = () => { 
+        document.getElementById('adminLoginOverlay').classList.remove('hidden'); 
+        document.getElementById('adminDashboard').classList.add('hidden'); 
+        document.getElementById('adminPassInput').value = ''; 
+    };
+    
+    async function fetchPosts() { const snap = await getDocs(collection(db, "posts")); allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() })); return allPosts; }
+    async function fetchUsers() { const snap = await getDocs(collection(db, "users")); allUsers = []; for(const docSnap of snap.docs) { let user = { id: docSnap.id, ...docSnap.data(), isBanned: docSnap.data().isBanned || false }; const userPosts = allPosts.filter(p => p.publisherId === user.id); user.postsCount = userPosts.length; allUsers.push(user); } return allUsers; }
+    async function fetchWithdrawals() { const snap = await getDocs(collection(db, "withdrawRequests")); withdrawalRequests = snap.docs.map(d => ({ id: d.id, ...d.data() })); withdrawalRequests.sort((a,b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)); return withdrawalRequests; }
+    
+    async function refreshAllData() { await fetchPosts(); await fetchUsers(); await fetchWithdrawals(); updateStats(); renderCurrentTab(); }
+    
+    function updateStats() { 
+        document.getElementById('statTotalUsers').innerText = allUsers.length; 
+        document.getElementById('statTotalPosts').innerText = allPosts.length; 
+        let totalEarn = allUsers.reduce((s,u)=> s+(u.earnings||0),0); 
+        let totalDown = allUsers.reduce((s,u)=> s+(u.downloads||0),0); 
+        document.getElementById('statTotalEarnings').innerText = `$${totalEarn.toFixed(2)}`; 
+        document.getElementById('statTotalDownloads').innerText = totalDown; 
+        let pending = withdrawalRequests.filter(w => w.status === 'pending').length; 
+        document.getElementById('statPendingWithdrawals').innerText = pending; 
+    }
+    
+    function renderCurrentTab() { 
+        if(currentTab === 'posts') renderPostsTable(); 
+        else if(currentTab === 'users') renderUsersTable(); 
+        else if(currentTab === 'withdraw') renderWithdrawalsTable(); 
+    }
+    
+    // POSTS with click preview
+    function renderPostsTable() {
+        let tbody = document.getElementById('postsTableBody');
+        let searchTerm = document.getElementById('postSearchInput')?.value.toLowerCase() || '';
+        let filtered = allPosts.filter(p => (p.title || '').toLowerCase().includes(searchTerm) || (p.tags || []).some(t=>t.toLowerCase().includes(searchTerm)) || (p.publisherName || '').toLowerCase().includes(searchTerm));
+        if(!filtered.length){ tbody.innerHTML='<tr><td colspan="7" class="text-center py-8">No posts found</td></tr>'; return; }
+        tbody.innerHTML='';
+        filtered.forEach(post => {
+            let row = document.createElement('tr');
+            row.innerHTML = `
+                <td><img src="${post.url || 'https://placehold.co/60'}" class="w-12 h-12 rounded-lg object-cover cursor-pointer hover:opacity-80 preview-trigger" data-id="${post.id}" data-url="${post.url}" data-title="${escapeHtml(post.title||'Untitled')}" data-img="${post.url}"></td>
+                <td><div class="font-semibold">${escapeHtml(post.title||'Untitled')}</div><div class="text-xs text-gray-400">${(post.tags||[]).slice(0,2).map(t=>'#'+escapeHtml(t)).join(' ')}</div></td>
+                <td>${escapeHtml(post.publisherName||'Anon')}</td>
+                <td>${post.likes||0}</td><td>${post.downloads||0}</td><td>${post.impressions||0}</td>
+                <td><button class="bg-red-700/80 hover:bg-red-600 px-3 py-1.5 rounded-lg text-xs delete-post-btn" data-id="${post.id}"><i class="fas fa-trash"></i> Delete</button></td>
+            `;
+            let previewImg = row.querySelector('.preview-trigger');
+            previewImg.addEventListener('click', (e) => { e.stopPropagation(); openPostPreview(post.id, post.url, post.title); });
+            let delBtn = row.querySelector('.delete-post-btn');
+            delBtn.onclick = async () => { if(confirm(`Delete "${post.title}"?`)){ await deleteDoc(doc(db,"posts",post.id)); showToast("Post deleted"); refreshAllData(); } };
+            tbody.appendChild(row);
+        });
+    }
+    
+    // Preview modal logic
+    window.openPostPreview = (postId, imageUrl, title) => {
+        currentPreviewPostId = postId;
+        document.getElementById('previewImage').src = imageUrl;
+        document.getElementById('previewTitle').innerHTML = `<i class="fas fa-eye text-purple-400"></i> ${escapeHtml(title)}`;
+        document.getElementById('postPreviewModal').style.display = 'flex';
+        const delBtnModal = document.getElementById('previewDeleteBtn');
+        delBtnModal.onclick = async () => {
+            if(confirm("Permanently delete this post?")){
+                await deleteDoc(doc(db,"posts",currentPreviewPostId));
+                showToast("Post deleted from preview");
+                closePreviewModal();
+                refreshAllData();
+            }
+        };
+    };
+    window.closePreviewModal = () => { document.getElementById('postPreviewModal').style.display = 'none'; currentPreviewPostId = null; };
+    
+    // USERS with inline earnings edit + search
+    async function updateUserEarnings(userId, newEarnings) {
+        if(isNaN(newEarnings)) return false;
+        await updateDoc(doc(db,"users",userId), { earnings: parseFloat(newEarnings) });
+        return true;
+    }
+    
+    function renderUsersTable() {
+        let tbody = document.getElementById('usersTableBody');
+        let searchTerm = document.getElementById('userSearchInput')?.value.toLowerCase() || '';
+        let filtered = allUsers.filter(u => (u.name || '').toLowerCase().includes(searchTerm) || (u.email || '').toLowerCase().includes(searchTerm));
+        if(!filtered.length){ tbody.innerHTML='<tr><td colspan="6" class="text-center py-8">No users found</td></tr>'; return; }
+        tbody.innerHTML='';
+        filtered.forEach(user => {
+            let row = document.createElement('tr');
+            let banStatus = user.isBanned ? '<span class="badge-ban">🔒 Banned</span>' : '<span class="badge-active">✔️ Active</span>';
+            row.innerHTML = `
+                <td><div class="flex items-center gap-2"><img src="${user.photo||'https://ui-avatars.com/api/?name='+encodeURIComponent(user.name||'User')}" class="w-7 h-7 rounded-full"> ${escapeHtml(user.name||'No Name')}</div></td>
+                <td>${escapeHtml(user.email||'')}</td>
+                <td><div class="flex items-center gap-2"><input type="number" step="0.01" value="${(user.earnings||0).toFixed(2)}" class="inline-edit-earnings earnings-input" data-id="${user.id}" style="width:110px"><button class="bg-purple-600/70 hover:bg-purple-500 px-2 py-1 rounded-lg text-xs save-earnings-btn" data-id="${user.id}"><i class="fas fa-save"></i></button></div></td>
+                <td>${user.postsCount || 0}</td>
+                <td>${banStatus}</td>
+                <td><div class="flex gap-2"><button class="bg-purple-700/60 px-3 py-1 rounded-md text-xs toggle-ban" data-id="${user.id}" data-banned="${user.isBanned}">${user.isBanned ? 'Unban' : 'Ban'}</button><button class="bg-red-800/50 px-3 py-1 rounded-md text-xs delete-user" data-id="${user.id}">Delete</button></div></td>
+            `;
+            let saveBtn = row.querySelector('.save-earnings-btn');
+            let earningsInput = row.querySelector('.earnings-input');
+            saveBtn.onclick = async () => { let newVal = parseFloat(earningsInput.value); if(!isNaN(newVal)){ await updateDoc(doc(db,"users",user.id), { earnings: newVal }); showToast(`Earnings for ${user.name} updated to $${newVal.toFixed(2)}`); refreshAllData(); } else showToast("Invalid amount",true); };
+            let banBtn = row.querySelector('.toggle-ban');
+            banBtn.onclick = async () => { let newState = !user.isBanned; await updateDoc(doc(db,"users",user.id), { isBanned: newState }); showToast(`${user.name} ${newState ? 'banned' : 'unbanned'}`); refreshAllData(); };
+            let delBtn = row.querySelector('.delete-user');
+            delBtn.onclick = async () => { if(confirm(`Delete user ${user.name} and all posts?`)){ let batch = writeBatch(db); let qPosts = await getDocs(query(collection(db,"posts"), where("publisherId","==",user.id))); qPosts.forEach(p => batch.delete(p.ref)); batch.delete(doc(db,"users",user.id)); await batch.commit(); showToast(`User ${user.name} removed`); refreshAllData(); } };
+            tbody.appendChild(row);
+        });
+    }
+    
+    // Withdrawals: Approve / Reject with refund
+    function renderWithdrawalsTable() { 
+        let container = document.getElementById('withdrawRequestsContainer'); 
+        if(!withdrawalRequests.length) { container.innerHTML = '<div class="text-center py-12 text-gray-400"><i class="fas fa-inbox"></i> No withdrawal requests</div>'; return; } 
+        container.innerHTML = ''; 
+        withdrawalRequests.forEach(req => { 
+            let statusColor = req.status === 'pending' ? 'withdraw-status-pending' : (req.status === 'approved' ? 'withdraw-status-approved' : 'withdraw-status-rejected'); 
+            let card = document.createElement('div'); 
+            card.className = 'withdraw-card p-5'; 
+            card.innerHTML = `
+                <div class="flex flex-wrap justify-between items-center">
+                    <div><p class="font-bold">${escapeHtml(req.userName)}</p><p class="text-sm text-gray-400">${req.method || 'Bank/Wallet'} • ${escapeHtml(req.accountNumber)}</p><p class="text-xs mt-1">Requested: ${new Date(req.createdAt?.toMillis?.() || Date.now()).toLocaleString()}</p></div>
+                    <div><span class="text-xl font-black text-purple-300">$${req.amount.toFixed(2)}</span><div class="text-right mt-1"><span class="text-xs font-semibold ${statusColor}">${req.status.toUpperCase()}</span></div></div>
+                </div>
+                <div class="flex gap-3 mt-4 justify-end">
+                    ${req.status === 'pending' ? `<button class="bg-green-700 hover:bg-green-600 px-4 py-1.5 rounded-lg text-sm approve-withdraw" data-id="${req.id}" data-amount="${req.amount}" data-userid="${req.userId}"><i class="fas fa-check-circle"></i> Approve</button><button class="bg-red-700 hover:bg-red-600 px-4 py-1.5 rounded-lg text-sm reject-withdraw" data-id="${req.id}" data-amount="${req.amount}" data-userid="${req.userId}"><i class="fas fa-times-circle"></i> Reject & Refund</button>` : '<span class="text-gray-500 text-sm">Processed</span>'}
+                </div>
+            `; 
+            let approveBtn = card.querySelector('.approve-withdraw'); 
+            let rejectBtn = card.querySelector('.reject-withdraw'); 
+            if(approveBtn) approveBtn.onclick = async () => { await updateDoc(doc(db,"withdrawRequests",req.id), { status: 'approved', processedAt: new Date() }); showToast(`Withdrawal $${req.amount} approved`); refreshAllData(); }; 
+            if(rejectBtn) rejectBtn.onclick = async () => { 
+                const userRef = doc(db,"users",req.userId); const userSnap = await getDoc(userRef); 
+                if(userSnap.exists()){ let currentEarn = userSnap.data().earnings || 0; await updateDoc(userRef, { earnings: currentEarn + req.amount }); } 
+                await updateDoc(doc(db,"withdrawRequests",req.id), { status: 'rejected', processedAt: new Date() }); 
+                showToast(`Request rejected, $${req.amount} refunded to user`); refreshAllData(); 
+            }; 
+            container.appendChild(card); 
+        }); 
+    }
+    
+    // Earnings rate and settings
+    async function updateEarningRate() { let newRate = parseFloat(document.getElementById('ratePerDownload').value); if(isNaN(newRate) || newRate < 0) return showToast("Invalid rate", true); await setDoc(doc(db,"platformSettings","earningRate"), { ratePerDownload: newRate, updatedAt: new Date() }); showToast(`Earning rate updated: $${newRate.toFixed(3)} per download`); }
+    async function updateMinWithdraw() { let minVal = parseFloat(document.getElementById('minWithdrawAmount').value); if(minVal>0) await setDoc(doc(db,"platformSettings","minWithdraw"), { amount: minVal }); showToast(`Minimum withdrawal set to $${minVal}`); }
+    async function updateGlobalSettings() { let mb = document.getElementById('maxUploadMB').value; await setDoc(doc(db,"platformSettings","uploadLimit"), { maxMB: parseInt(mb) }); showToast(`Upload limit updated: ${mb} MB`); }
+    async function loadSettings() { let rateDoc = await getDoc(doc(db,"platformSettings","earningRate")); if(rateDoc.exists()) document.getElementById('ratePerDownload').value = rateDoc.data().ratePerDownload; let minDoc = await getDoc(doc(db,"platformSettings","minWithdraw")); if(minDoc.exists()) document.getElementById('minWithdrawAmount').value = minDoc.data().amount; let limitDoc = await getDoc(doc(db,"platformSettings","uploadLimit")); if(limitDoc.exists()) document.getElementById('maxUploadMB').value = limitDoc.data().maxMB; }
+    
+    window.switchTab = (tab) => { 
+        currentTab = tab; 
+        ['postsPanel','usersPanel','withdrawPanel','settingsPanel'].forEach(id => document.getElementById(id).classList.add('hidden'));
+        document.getElementById('tabPosts').classList.remove('border-purple-400','text-purple-400'); 
+        document.getElementById('tabUsers').classList.remove('border-purple-400','text-purple-400'); 
+        document.getElementById('tabWithdraw').classList.remove('border-purple-400','text-purple-400'); 
+        document.getElementById('tabSettings').classList.remove('border-purple-400','text-purple-400'); 
+        document.getElementById('tabPosts').classList.add('text-gray-400'); 
+        document.getElementById('tabUsers').classList.add('text-gray-400'); 
+        document.getElementById('tabWithdraw').classList.add('text-gray-400'); 
+        document.getElementById('tabSettings').classList.add('text-gray-400');
+        if(tab === 'posts') { document.getElementById('postsPanel').classList.remove('hidden'); document.getElementById('tabPosts').classList.add('border-purple-400','text-purple-400'); renderPostsTable(); }
+        else if(tab === 'users') { document.getElementById('usersPanel').classList.remove('hidden'); document.getElementById('tabUsers').classList.add('border-purple-400','text-purple-400'); renderUsersTable(); }
+        else if(tab === 'withdraw') { document.getElementById('withdrawPanel').classList.remove('hidden'); document.getElementById('tabWithdraw').classList.add('border-purple-400','text-purple-400'); renderWithdrawalsTable(); }
+        else if(tab === 'settings') { document.getElementById('settingsPanel').classList.remove('hidden'); document.getElementById('tabSettings').classList.add('border-purple-400','text-purple-400'); loadSettings(); }
+    };
+    
+    // Event listeners for search inputs
+    document.getElementById('postSearchInput')?.addEventListener('input', () => { if(currentTab === 'posts') renderPostsTable(); });
+    document.getElementById('userSearchInput')?.addEventListener('input', () => { if(currentTab === 'users') renderUsersTable(); });
+    
+    window.updateEarningRate = updateEarningRate;
+    window.updateMinWithdraw = updateMinWithdraw;
+    window.updateGlobalSettings = updateGlobalSettings;
+    window.refreshAllData = refreshAllData;
+    
+    refreshAllData();
+</script>
+</body>
+</html>
