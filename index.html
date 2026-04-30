@@ -3,30 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="description" content="CrowdPic - Share your photography, earn from downloads, and explore premium images worldwide">
     <title>CrowdPic - Share & Earn | Premium Photography</title>
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://api.cloudinary.com">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         * { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
-        :root { --primary: #6C63FF; }
+        :root { --primary: #6C63FF; --skeleton-bg: #e2e8f0; --skeleton-shimmer: #f1f5f9; }
         body { background: #f5f7fc; overflow-x: hidden; }
+        
+        /* Glass Navigation */
         .glass-nav { background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #eef2ff; }
         .brand-logo { height: 56px; width: auto; object-fit: contain; transition: transform 0.2s ease; }
+        
+        /* Post Cards - Masonry Layout */
         .post-card { break-inside: avoid; margin-bottom: 1.25rem; border-radius: 1.25rem; background: white; transition: all 0.25s cubic-bezier(0.2, 0, 0, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; overflow: hidden; border: 1px solid rgba(108,99,255,0.12); }
         .post-card:hover { transform: translateY(-6px); box-shadow: 0 24px 36px -12px rgba(108,99,255,0.22); }
+        
+        /* Masonry Grid - Responsive */
         .masonry-grid { column-count: 2; column-gap: 1.2rem; }
         @media (min-width: 640px) { .masonry-grid { column-count: 3; } }
         @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
+        @media (min-width: 1920px) { .masonry-grid { column-count: 5; } }
+        
+        /* Skeleton Loader - Shimmer Effect */
+        .skeleton-card { break-inside: avoid; margin-bottom: 1.25rem; border-radius: 1.25rem; background: white; overflow: hidden; border: 1px solid rgba(108,99,255,0.12); }
+        .skeleton-image { width: 100%; aspect-ratio: 4/3; background: linear-gradient(110deg, var(--skeleton-bg) 8%, var(--skeleton-shimmer) 18%, var(--skeleton-bg) 33%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; border-radius: 1.25rem 1.25rem 0 0; }
+        .skeleton-text { height: 16px; background: linear-gradient(110deg, var(--skeleton-bg) 8%, var(--skeleton-shimmer) 18%, var(--skeleton-bg) 33%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; border-radius: 8px; margin: 12px; width: 80%; }
+        .skeleton-text-sm { width: 60%; height: 12px; margin: 8px 12px 12px 12px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        /* Modal & Form Styles */
         .custom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
         .btn-gradient { background: linear-gradient(105deg, #6C63FF, #4a42d0); color: white; transition: all 0.2s; border: none; cursor: pointer; font-weight: 600; }
         .btn-gradient:hover { opacity: 0.92; transform: scale(0.98); }
         .auth-tab.active { border-bottom: 3px solid #6C63FF; color: #6C63FF; font-weight: 700; }
         .like-active { color: #ef4444 !important; transform: scale(1.12); }
-        .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 60px; font-weight: 500; z-index: 2500; backdrop-filter: blur(8px); font-size: 0.9rem; box-shadow: 0 12px 25px -8px black; pointer-events: none; transition: opacity 0.2s; font-family: monospace; letter-spacing: 0.3px; }
+        .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 60px; font-weight: 500; z-index: 2500; backdrop-filter: blur(8px); font-size: 0.9rem; box-shadow: 0 12px 25px -8px black; pointer-events: none; transition: opacity 0.2s; }
         .back-btn { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #4b44d1; cursor: pointer; margin-bottom: 20px; width: fit-content; transition: 0.2s; }
         .back-btn:hover { transform: translateX(-5px); }
         img { user-select: none; }
         .stat-number { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
+        
+        /* Profile Grid */
         .profile-posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
         .profile-post-card { position: relative; border-radius: 1rem; overflow: hidden; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; cursor: pointer; }
         .profile-post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(108,99,255,0.25); }
@@ -40,6 +69,10 @@
         .admin-badge:hover { transform: scale(1.02); }
         .banned-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); }
         .banned-card { background: white; padding: 2rem; border-radius: 2rem; text-align: center; border: 2px solid #ef4444; }
+        
+        /* Lazy loading blur effect */
+        .lazy-img { transition: filter 0.2s ease; }
+        .lazy-img.loaded { filter: blur(0); }
     </style>
 </head>
 <body>
@@ -120,7 +153,9 @@
     </section>
 
     <section id="homeScreen" class="hidden">
-        <div id="feed" class="masonry-grid"></div>
+        <div id="feed" class="masonry-grid">
+            <!-- Skeleton loaders will be shown dynamically -->
+        </div>
     </section>
 
     <section id="uploadScreen" class="hidden max-w-2xl mx-auto">
@@ -252,22 +287,77 @@
 <div id="customToast" class="toast-msg opacity-0 pointer-events-none transition-all duration-300"></div>
 
 <script type="module">
+    // ============================================
+    // CONFIGURATION - Environment Variables
+    // Note: In production, move these to a .env file
+    // ============================================
+    const CONFIG = {
+        firebase: {
+            apiKey: "AIzaSyAJ9gHtjhr_HkVizgzK2bjAEL4nNNrtsyA",
+            authDomain: "crowdpic-b474a.firebaseapp.com",
+            projectId: "crowdpic-b474a",
+            storageBucket: "crowdpic-b474a.firebasestorage.app",
+            messagingSenderId: "333394164466",
+            appId: "1:333394164466:web:7c854a062acdb177426e6b"
+        },
+        cloudinary: {
+            cloudName: "dmikqzfuu",
+            uploadPreset: "crowdpic"
+        }
+    };
+    
+    // Cloudinary URL optimizer with f_auto,q_auto, dynamic resizing, and watermark
+    function optimizeCloudinaryUrl(url, width = null, height = null, addWatermark = false) {
+        if (!url || !url.includes('cloudinary')) return url;
+        // Extract public ID from Cloudinary URL
+        const parts = url.split('/upload/');
+        if (parts.length < 2) return url;
+        let transformations = 'f_auto,q_auto';
+        if (width) transformations += `,w_${width}`;
+        if (height) transformations += `,h_${height}`;
+        if (addWatermark) {
+            transformations += `,l_logo_watermark,g_north_west,x_20,y_20,o_30`;
+        }
+        return `${parts[0]}/upload/${transformations}/${parts[1]}`;
+    }
+    
+    // Show skeleton loaders while fetching feed
+    function showSkeletonLoaders(container, count = 8) {
+        container.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const skeleton = document.createElement('div');
+            skeleton.className = 'skeleton-card';
+            skeleton.innerHTML = `
+                <div class="skeleton-image"></div>
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text-sm"></div>
+            `;
+            container.appendChild(skeleton);
+        }
+    }
+    
+    // Lazy load image observer
+    function lazyLoadImages() {
+        const images = document.querySelectorAll('img[data-src]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                    img.removeAttribute('data-src');
+                    observer.unobserve(img);
+                }
+            });
+        }, { rootMargin: '100px' });
+        images.forEach(img => observer.observe(img));
+    }
+    
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, increment, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAJ9gHtjhr_HkVizgzK2bjAEL4nNNrtsyA",
-        authDomain: "crowdpic-b474a.firebaseapp.com",
-        projectId: "crowdpic-b474a",
-        storageBucket: "crowdpic-b474a.firebasestorage.app",
-        messagingSenderId: "333394164466",
-        appId: "1:333394164466:web:7c854a062acdb177426e6b"
-    };
-    const cloudName = "dmikqzfuu";
-    const uploadPreset = "crowdpic";
-
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(CONFIG.firebase);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
@@ -294,12 +384,12 @@
         if(!loaderDiv) return;
         loaderDiv.style.display = 'flex';
         imgElement.style.display = 'none';
-        imgElement.classList.add('opacity-0');
-        imgElement.src = imageUrl;
+        const optimizedUrl = optimizeCloudinaryUrl(imageUrl, 800, null, false);
+        imgElement.src = optimizedUrl;
         if(imgElement.complete) finalizeImageLoad(imgElement, loaderDiv);
         else { imgElement.onload = () => finalizeImageLoad(imgElement, loaderDiv); imgElement.onerror = () => { showFastToast("Failed to load image", true); loaderDiv.style.display = 'none'; imgElement.style.display = 'block'; }; }
     }
-    function finalizeImageLoad(imgElement, loaderDiv) { loaderDiv.style.display = 'none'; imgElement.style.display = 'block'; setTimeout(() => imgElement.classList.add('opacity-100'), 30); imgElement.classList.remove('opacity-0'); }
+    function finalizeImageLoad(imgElement, loaderDiv) { loaderDiv.style.display = 'none'; imgElement.style.display = 'block'; setTimeout(() => imgElement.classList.add('opacity-100'), 30); }
 
     window.triggerDirectDownload = async () => {
         if (!activePost) return;
@@ -404,8 +494,8 @@
         const file = input.files[0]; if(!file) return;
         showFastToast("Uploading profile picture...");
         try {
-            const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', uploadPreset);
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: fd });
+            const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { method: 'POST', body: fd });
             const data = await res.json();
             const imageUrl = data.secure_url;
             await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: imageUrl });
@@ -436,7 +526,8 @@
                 posts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
                 posts.forEach(post => {
                     const postCard = document.createElement('div'); postCard.className = 'profile-post-card';
-                    postCard.innerHTML = `<button class="profile-delete-btn" onclick="event.stopPropagation(); window.deleteProfilePost('${post.id}')"><i class="fas fa-trash"></i> Delete</button><img src="${post.url}" alt="${post.title}" loading="lazy"><div class="profile-post-info"><h4>${post.title || 'Untitled'}</h4><div class="profile-post-stats"><span><i class="fas fa-heart text-red-400"></i> ${post.likes || 0}</span><span><i class="fas fa-download text-blue-400"></i> ${post.downloads || 0}</span><span><i class="fas fa-eye text-green-400"></i> ${post.impressions || 0}</span></div></div>`;
+                    const optimizedUrl = optimizeCloudinaryUrl(post.url, 400, 300, false);
+                    postCard.innerHTML = `<button class="profile-delete-btn" onclick="event.stopPropagation(); window.deleteProfilePost('${post.id}')"><i class="fas fa-trash"></i> Delete</button><img src="${optimizedUrl}" alt="${post.title}" loading="lazy"><div class="profile-post-info"><h4>${post.title || 'Untitled'}</h4><div class="profile-post-stats"><span><i class="fas fa-heart text-red-400"></i> ${post.likes || 0}</span><span><i class="fas fa-download text-blue-400"></i> ${post.downloads || 0}</span><span><i class="fas fa-eye text-green-400"></i> ${post.impressions || 0}</span></div></div>`;
                     postCard.addEventListener('click', (e) => { if(!e.target.closest('.profile-delete-btn')) openDetail(post); });
                     postsGrid.appendChild(postCard);
                 });
@@ -462,19 +553,24 @@
 
     window.renderFeed = async (searchTerm = "") => {
         const container = document.getElementById('feed');
-        container.innerHTML = '<div class="col-span-full text-center py-12"><i class="fas fa-spinner fa-pulse text-purple-500 text-3xl"></i></div>';
+        showSkeletonLoaders(container, 8);
+        
         const snap = await getDocs(collection(db, "posts"));
-        container.innerHTML = '';
-        const allPosts = []; snap.forEach(docSnap => { const p = docSnap.data(); p.id = docSnap.id; allPosts.push(p); });
+        const allPosts = []; 
+        snap.forEach(docSnap => { const p = docSnap.data(); p.id = docSnap.id; allPosts.push(p); });
         allPosts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+        
+        container.innerHTML = '';
         let hasAny = false;
         allPosts.forEach(p => {
             const lowerSearch = (searchTerm || "").toLowerCase().replace('#','');
             const match = !lowerSearch || (p.title && p.title.toLowerCase().includes(lowerSearch)) || (p.tags || []).some(tag => tag.toLowerCase().includes(lowerSearch));
             if(match) {
                 hasAny = true;
-                const card = document.createElement('div'); card.className = 'post-card';
-                card.innerHTML = `<div class="post-image-wrapper relative"><img src="${p.url}" class="w-full" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Not+Found'"><div class="absolute inset-0 bg-gray-200 flex items-center justify-center" style="z-index:-1"><i class="fas fa-image text-gray-400 text-3xl"></i></div></div><div class="p-3"><p class="font-bold text-sm truncate">${p.title || 'Untitled'}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${p.publisherName || 'Anonymous'}</span><span><i class="fas fa-heart text-pink-400"></i> ${p.likes || 0}</span></div></div>`;
+                const card = document.createElement('div'); 
+                card.className = 'post-card';
+                const optimizedThumb = optimizeCloudinaryUrl(p.url, 400, null, false);
+                card.innerHTML = `<div class="post-image-wrapper relative"><img src="${optimizedThumb}" class="w-full" loading="lazy" alt="${p.title || 'Photo'}" onerror="this.src='https://via.placeholder.com/400x300?text=Not+Found'"><div class="absolute inset-0 bg-gray-200 flex items-center justify-center" style="z-index:-1"><i class="fas fa-image text-gray-400 text-3xl"></i></div></div><div class="p-3"><p class="font-bold text-sm truncate">${p.title || 'Untitled'}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${p.publisherName || 'Anonymous'}</span><span><i class="fas fa-heart text-pink-400"></i> ${p.likes || 0}</span></div></div>`;
                 card.onclick = () => openDetail(p);
                 container.appendChild(card);
             }
@@ -531,8 +627,8 @@
         if(!selectedFile || !title) return showFastToast("Photo and Title required", true);
         const btn = document.getElementById('postBtn'); btn.disabled = true; btn.innerText = "Uploading...";
         try {
-            const fd = new FormData(); fd.append('file', selectedFile); fd.append('upload_preset', uploadPreset);
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: fd });
+            const fd = new FormData(); fd.append('file', selectedFile); fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { method: 'POST', body: fd });
             const data = await res.json();
             const tagArray = tagsRaw.split(',').map(x => x.trim().replace('#','')).filter(x=>x);
             await addDoc(collection(db, "posts"), { title, url: data.secure_url, tags: tagArray, publisherId: auth.currentUser.uid, publisherName: userData.name, publisherDp: userData.photo, likes: 0, downloads: 0, impressions: 0, createdAt: serverTimestamp() });
@@ -544,51 +640,33 @@
     
     window.setMethod = (m) => { withdrawMethod = m; document.getElementById('selEasypaisa').style.borderColor = m === 'Easypaisa' ? '#6C63FF' : '#e5e7eb'; document.getElementById('selJazzcash').style.borderColor = m === 'Jazzcash' ? '#6C63FF' : '#e5e7eb'; };
     
-    // WITHDRAWAL SYSTEM: Deducts earnings immediately when request is submitted
     window.requestWithdraw = async () => { 
         const name = document.getElementById('wdName').value.trim(); 
         const num = document.getElementById('wdNumber').value.trim(); 
         if(!withdrawMethod || !name || !num) return showFastToast("Fill all fields", true); 
         if(!userData || userData.earnings < 30) return showFastToast("Minimum $30 required to withdraw", true); 
-        
         const withdrawAmount = userData.earnings;
-        
         try {
-            // Use transaction to ensure earnings are deducted atomically
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, "users", auth.currentUser.uid);
                 const userSnap = await transaction.get(userRef);
                 if (!userSnap.exists()) throw new Error("User not found");
                 const currentEarnings = userSnap.data().earnings || 0;
                 if (currentEarnings < 30) throw new Error("Insufficient funds");
-                
-                // Deduct the full earnings
                 transaction.update(userRef, { earnings: 0 });
-                
-                // Create withdrawal request record
                 const withdrawRef = doc(collection(db, "withdrawRequests"));
                 transaction.set(withdrawRef, {
-                    userId: auth.currentUser.uid,
-                    userName: userData.name,
-                    method: withdrawMethod,
-                    accountHolder: name,
-                    accountNumber: num,
-                    amount: withdrawAmount,
-                    status: "pending",
-                    requestedAt: serverTimestamp(),
-                    createdAt: serverTimestamp()
+                    userId: auth.currentUser.uid, userName: userData.name, method: withdrawMethod,
+                    accountHolder: name, accountNumber: num, amount: withdrawAmount,
+                    status: "pending", requestedAt: serverTimestamp(), createdAt: serverTimestamp()
                 });
             });
-            
-            // Update local userData
             userData.earnings = 0;
             await updateStudioAndProfile();
-            showFastToast(`Withdrawal request submitted for $${withdrawAmount.toFixed(2)}. Earnings deducted. Admin will process.`);
+            showFastToast(`Withdrawal request submitted for $${withdrawAmount.toFixed(2)}. Earnings deducted.`);
             document.getElementById('wdName').value = '';
             document.getElementById('wdNumber').value = '';
-        } catch(e) { 
-            showFastToast("Error: " + e.message, true); 
-        }
+        } catch(e) { showFastToast("Error: " + e.message, true); }
     };
     
     window.copyShareLink = () => { navigator.clipboard.writeText(window.location.href); showFastToast("Link copied"); };
