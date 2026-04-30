@@ -29,62 +29,73 @@
         .back-btn:hover { transform: translateX(-5px); }
         img { user-select: none; }
         .stat-number { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
-        .profile-pic-overlay { position: relative; display: inline-block; cursor: pointer; }
-        .edit-icon { position: absolute; bottom: 5px; right: 5px; background: #6C63FF; border-radius: 50%; padding: 6px; color: white; font-size: 12px; border: 2px solid white; }
         
-        /* Enhanced fullscreen loading overlay for modal image preview */
-        .image-loading-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 30;
-            border-radius: 24px;
+        /* Profile posts grid styles */
+        .profile-posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
         }
-        .modal-skeleton {
-            background: #1a1a2e;
-            border-radius: 28px;
-            animation: pulse 1.4s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-        .full-img-hidden {
-            display: none;
-        }
-        .full-img-visible {
-            display: block;
-        }
-        .skeleton-loader {
-            background: linear-gradient(90deg, #2d2d44 25%, #3a3a55 50%, #2d2d44 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.2s infinite;
-        }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        .post-image-wrapper {
+        
+        .profile-post-card {
             position: relative;
-            background: #eef2ff;
+            border-radius: 1rem;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
-        .post-skeleton {
-            position: absolute;
-            inset: 0;
-            background: #e2e8f0;
+        
+        .profile-post-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(108,99,255,0.25);
+        }
+        
+        .profile-post-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .profile-post-info {
+            padding: 12px;
+            background: white;
+        }
+        
+        .profile-post-info h4 {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+        
+        .profile-post-stats {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #94a3b8;
-            transition: opacity 0.2s;
+            gap: 12px;
+            font-size: 12px;
+            color: #64748b;
         }
-        .post-card img {
-            transition: opacity 0.25s ease;
+        
+        .profile-delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        
+        .profile-delete-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -191,11 +202,27 @@
             </div>
             <p class="text-xs text-gray-400 mt-3">Click on profile picture to change</p>
         </div>
-        <div class="flex justify-end mb-4">
-            <button onclick="checkAuthAndGo('uploadScreen')" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-md flex items-center gap-2 transition hover:scale-105"><i class="fas fa-plus-circle"></i> Add New Post</button>
+        
+        <!-- Add New Post Button -->
+        <div class="flex justify-end mb-6">
+            <button onclick="checkAuthAndGo('uploadScreen')" class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold shadow-md flex items-center gap-2 transition hover:scale-105">
+                <i class="fas fa-plus-circle"></i> Add New Post
+            </button>
         </div>
-        <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i class="fas fa-images text-purple-500"></i> My Uploads</h3>
-        <div id="myPostsGrid" class="masonry-grid"></div>
+        
+        <!-- User's Posts Grid -->
+        <div id="userPostsSection">
+            <h3 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                <i class="fas fa-images text-purple-500"></i> My Uploads
+            </h3>
+            <div id="profilePostsGrid" class="profile-posts-grid">
+                <!-- Posts will be loaded here dynamically -->
+            </div>
+            <div id="noPostsMessage" class="text-center py-12 text-gray-400 hidden">
+                <i class="fas fa-camera-retro text-6xl mb-4 opacity-30"></i>
+                <p class="text-lg">No posts yet. Start sharing your photography!</p>
+            </div>
+        </div>
     </section>
 
     <section id="studioScreen" class="hidden">
@@ -237,7 +264,6 @@
     <section id="postDetail" class="hidden">
         <div onclick="showScreen('homeScreen')" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Feed</div>
         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden grid md:grid-cols-2 gap-0 relative">
-            <!-- LEFT: Image container with loading skeleton & brand placeholder -->
             <div class="bg-black/5 flex items-center justify-center min-h-[420px] p-4 relative" id="detailImageContainer">
                 <div id="detailLoaderSkeleton" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/95 z-20 rounded-l-2xl backdrop-blur-md">
                     <div class="w-20 h-20 mb-4 rounded-full bg-white/20 animate-pulse flex items-center justify-center">
@@ -313,16 +339,13 @@
         }, 2500);
     }
 
-    // Enhanced image loader with brand logo + loading skeleton
     async function loadImageWithSkeleton(imgElement, imageUrl) {
-        const container = document.getElementById('detailImageContainer');
         const loaderDiv = document.getElementById('detailLoaderSkeleton');
         if(!loaderDiv) return;
         loaderDiv.style.display = 'flex';
         imgElement.style.display = 'none';
         imgElement.classList.add('opacity-0');
         
-        // Reset image
         imgElement.src = imageUrl;
         if(imgElement.complete) {
             finalizeImageLoad(imgElement, loaderDiv);
@@ -343,7 +366,6 @@
         imgElement.classList.remove('opacity-0');
     }
 
-    // Gallery download with blob support
     window.triggerDirectDownload = async () => {
         if (!activePost) return;
         const downloadBtn = document.getElementById('downloadDetailBtn');
@@ -379,6 +401,7 @@
 
     window.openAuthModal = () => document.getElementById('authModal').style.display = 'flex';
     window.closeAuthModal = () => document.getElementById('authModal').style.display = 'none';
+    
     window.switchAuthTab = (m) => {
         authMode = m;
         document.getElementById('tabLogin').classList.toggle('active', m==='login');
@@ -386,6 +409,7 @@
         document.getElementById('nameInputGroup').classList.toggle('hidden', m==='login');
         document.getElementById('authSubmitBtn').innerText = m==='login' ? 'Login' : 'Create Account';
     };
+    
     window.handleAuthSubmit = async () => {
         const email = document.getElementById('authEmail').value;
         const pass = document.getElementById('authPassword').value;
@@ -410,6 +434,7 @@
             showScreen('profilePage');
         } catch(e) { showFastToast(e.message, true); }
     };
+    
     window.handleLogout = () => signOut(auth).then(() => { location.reload(); });
     
     onAuthStateChanged(auth, async (u) => {
@@ -431,9 +456,13 @@
     window.showScreen = (id) => {
         ['landingScreen','homeScreen','uploadScreen','profilePage','studioScreen','postDetail'].forEach(s => document.getElementById(s).classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
-        if(id === 'profilePage' || id === 'studioScreen') updateStudioAndProfile();
+        if(id === 'profilePage') {
+            updateProfilePosts();
+        }
+        if(id === 'studioScreen') updateStudioAndProfile();
         window.scrollTo(0,0);
     };
+    
     window.checkAuthAndGo = (screen) => {
         if(!auth.currentUser) openAuthModal();
         else showScreen(screen);
@@ -456,6 +485,7 @@
             userData.photo = imageUrl;
             document.getElementById('userDp').src = imageUrl;
             document.getElementById('navUserDp').src = imageUrl;
+            // Update all posts with new profile picture
             const postsQuery = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
             const postsSnap = await getDocs(postsQuery);
             postsSnap.forEach(async (postDoc) => {
@@ -466,6 +496,101 @@
         input.value = '';
     };
 
+    // FIXED: Updated function to handle Firestore query properly
+    async function updateProfilePosts() {
+        if(!auth.currentUser || !userData) return;
+        
+        const postsGrid = document.getElementById('profilePostsGrid');
+        const noPostsMsg = document.getElementById('noPostsMessage');
+        
+        if(!postsGrid) return;
+        
+        // Show loading state
+        postsGrid.innerHTML = '<div class="col-span-full text-center py-8"><i class="fas fa-spinner fa-pulse text-purple-500 text-3xl"></i></div>';
+        
+        try {
+            // Use simple query without orderBy to avoid index requirement
+            const q = query(
+                collection(db, "posts"), 
+                where("publisherId", "==", auth.currentUser.uid)
+            );
+            
+            const snap = await getDocs(q);
+            
+            postsGrid.innerHTML = '';
+            
+            if(snap.empty) {
+                noPostsMsg.classList.remove('hidden');
+            } else {
+                noPostsMsg.classList.add('hidden');
+                
+                // Convert to array and sort manually by createdAt (newest first)
+                const posts = [];
+                snap.forEach(docSnap => {
+                    const post = docSnap.data();
+                    post.id = docSnap.id;
+                    posts.push(post);
+                });
+                
+                // Sort by createdAt timestamp (newest first)
+                posts.sort((a, b) => {
+                    const timeA = a.createdAt?.toMillis() || 0;
+                    const timeB = b.createdAt?.toMillis() || 0;
+                    return timeB - timeA;
+                });
+                
+                // Display sorted posts
+                posts.forEach(post => {
+                    const postCard = document.createElement('div');
+                    postCard.className = 'profile-post-card';
+                    postCard.innerHTML = `
+                        <button class="profile-delete-btn" onclick="event.stopPropagation(); window.deleteProfilePost('${post.id}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        <img src="${post.url}" alt="${post.title}" loading="lazy">
+                        <div class="profile-post-info">
+                            <h4>${post.title || 'Untitled'}</h4>
+                            <div class="profile-post-stats">
+                                <span><i class="fas fa-heart text-red-400"></i> ${post.likes || 0}</span>
+                                <span><i class="fas fa-download text-blue-400"></i> ${post.downloads || 0}</span>
+                                <span><i class="fas fa-eye text-green-400"></i> ${post.impressions || 0}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    postCard.addEventListener('click', (e) => {
+                        // Don't open detail if delete button was clicked
+                        if(!e.target.closest('.profile-delete-btn')) {
+                            openDetail(post);
+                        }
+                    });
+                    
+                    postsGrid.appendChild(postCard);
+                });
+            }
+        } catch(error) {
+            console.error("Error loading profile posts:", error);
+            postsGrid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500">Error loading posts. Please try again later.</div>';
+        }
+    }
+
+    // Delete post function
+    window.deleteProfilePost = async (postId) => {
+        if(!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
+        
+        try {
+            await deleteDoc(doc(db, "posts", postId));
+            showFastToast("Post deleted successfully");
+            await updateProfilePosts(); // Refresh the grid
+            // Also refresh studio if visible
+            if(!document.getElementById('studioScreen').classList.contains('hidden')) {
+                updateStudioAndProfile();
+            }
+        } catch(error) {
+            showFastToast("Error deleting post: " + error.message, true);
+        }
+    };
+
     async function updateStudioAndProfile() {
         if(!auth.currentUser || !userData) return;
         document.getElementById('statEarnings').innerText = userData.earnings?.toFixed(2) || "0.00";
@@ -473,53 +598,81 @@
         document.getElementById('userName').innerText = userData.name;
         document.getElementById('userDp').src = userData.photo;
         
-        const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid), orderBy("createdAt", "desc"));
+        // Use simple query without orderBy
+        const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
         const snap = await getDocs(q);
         let totalLikes = 0;
         let totalImpressions = 0;
-        const grid = document.getElementById('myPostsGrid');
-        grid.innerHTML = '';
+        
         snap.forEach(d => {
             const p = d.data();
             totalLikes += (p.likes || 0);
             totalImpressions += (p.impressions || 0);
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'post-card relative';
-            cardDiv.innerHTML = `<button class="delete-btn" onclick="window.deleteMyPost('${d.id}')">Delete</button><img src="${p.url}" class="w-full"><div class="p-2 text-xs text-gray-500 flex justify-between"><span><i class="fas fa-heart text-red-400"></i> ${p.likes || 0}</span><span><i class="fas fa-eye"></i> ${p.impressions || 0}</span></div>`;
-            grid.appendChild(cardDiv);
         });
+        
         document.getElementById('statTotalLikes').innerText = totalLikes;
         document.getElementById('profileImpressionsCount').innerText = totalImpressions;
     }
-    window.deleteMyPost = async (id) => {
-        if(!confirm("Delete this post permanently?")) return;
-        await deleteDoc(doc(db, "posts", id));
-        updateStudioAndProfile();
-        showFastToast("Post deleted");
-    };
 
     window.renderFeed = async (searchTerm = "") => {
         const container = document.getElementById('feed');
+        if(!container) return;
         container.innerHTML = '<div class="col-span-full text-center py-12"><i class="fas fa-spinner fa-pulse text-purple-500 text-3xl"></i></div>';
-        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+        
+        // Use simple query without orderBy
+        const q = query(collection(db, "posts"));
         const snap = await getDocs(q);
         container.innerHTML = '';
-        let hasAny = false;
+        
+        // Convert to array and sort manually
+        const allPosts = [];
         snap.forEach(docSnap => {
             const p = docSnap.data();
             p.id = docSnap.id;
+            allPosts.push(p);
+        });
+        
+        // Sort by createdAt (newest first)
+        allPosts.sort((a, b) => {
+            const timeA = a.createdAt?.toMillis() || 0;
+            const timeB = b.createdAt?.toMillis() || 0;
+            return timeB - timeA;
+        });
+        
+        let hasAny = false;
+        allPosts.forEach(p => {
             const lowerSearch = (searchTerm || "").toLowerCase().replace('#','');
-            const match = !lowerSearch || p.title.toLowerCase().includes(lowerSearch) || (p.tags || []).some(tag => tag.toLowerCase().includes(lowerSearch));
+            const match = !lowerSearch || 
+                         (p.title && p.title.toLowerCase().includes(lowerSearch)) || 
+                         (p.tags || []).some(tag => tag.toLowerCase().includes(lowerSearch));
+            
             if(match) {
                 hasAny = true;
                 const card = document.createElement('div');
                 card.className = 'post-card';
-                card.innerHTML = `<div class="post-image-wrapper relative"><img src="${p.url}" class="w-full" loading="lazy"><div class="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center" style="z-index:-1"><i class="fas fa-image text-gray-400 text-3xl"></i></div></div><div class="p-3"><p class="font-bold text-sm truncate">${p.title}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${p.publisherName}</span><span><i class="fas fa-heart text-pink-400"></i> ${p.likes || 0}</span></div></div>`;
+                card.innerHTML = `
+                    <div class="post-image-wrapper relative">
+                        <img src="${p.url}" class="w-full" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Found'">
+                        <div class="absolute inset-0 bg-gray-200 flex items-center justify-center" style="z-index:-1">
+                            <i class="fas fa-image text-gray-400 text-3xl"></i>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="font-bold text-sm truncate">${p.title || 'Untitled'}</p>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>${p.publisherName || 'Anonymous'}</span>
+                            <span><i class="fas fa-heart text-pink-400"></i> ${p.likes || 0}</span>
+                        </div>
+                    </div>
+                `;
                 card.onclick = () => openDetail(p);
                 container.appendChild(card);
             }
         });
-        if(!hasAny) container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">No matching photos. Try different tags.</div>';
+        
+        if(!hasAny) {
+            container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">No matching photos. Try different tags.</div>';
+        }
     };
 
     window.openDetail = async (post) => {
@@ -527,22 +680,22 @@
         await updateDoc(doc(db, "posts", post.id), { impressions: increment(1) });
         const updatedPostSnap = await getDoc(doc(db, "posts", post.id));
         const freshPost = updatedPostSnap.data();
-        // Show brand skeleton loader while image loads
+        
         const imgElement = document.getElementById('detailImg');
-        const loaderDiv = document.getElementById('detailLoaderSkeleton');
-        if(loaderDiv) loaderDiv.style.display = 'flex';
-        imgElement.style.display = 'none';
-        imgElement.src = post.url;
         loadImageWithSkeleton(imgElement, post.url);
         
-        document.getElementById('detailTitle').innerText = post.title;
-        document.getElementById('detailUserName').innerText = post.publisherName;
-        document.getElementById('detailUserDp').src = post.publisherDp;
-        document.getElementById('detailLikes').innerText = freshPost.likes || post.likes;
+        document.getElementById('detailTitle').innerText = post.title || 'Untitled';
+        document.getElementById('detailUserName').innerText = post.publisherName || 'Anonymous';
+        document.getElementById('detailUserDp').src = post.publisherDp || 'https://via.placeholder.com/48';
+        document.getElementById('detailLikes').innerText = freshPost.likes || post.likes || 0;
         document.getElementById('detailImpressionsCount').innerText = (freshPost.impressions || post.impressions || 0);
+        
         const likeBtn = document.getElementById('likeBtn');
-        if(userData && userData.likedPosts && userData.likedPosts.includes(post.id)) likeBtn.classList.add('like-active');
-        else likeBtn.classList.remove('like-active');
+        if(userData && userData.likedPosts && userData.likedPosts.includes(post.id)) {
+            likeBtn.classList.add('like-active');
+        } else {
+            likeBtn.classList.remove('like-active');
+        }
         
         const tagsDiv = document.getElementById('detailTags');
         tagsDiv.innerHTML = '';
@@ -550,13 +703,18 @@
             const span = document.createElement('span');
             span.className = 'bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-purple-100';
             span.innerText = '#' + t;
-            span.onclick = (e) => { e.stopPropagation(); renderFeed(t); showScreen('homeScreen'); };
+            span.onclick = (e) => { 
+                e.stopPropagation(); 
+                renderFeed(t); 
+                showScreen('homeScreen'); 
+            };
             tagsDiv.appendChild(span);
         });
+        
         showScreen('postDetail');
     };
 
-    window.toggleLike = async () => { /* same as original but stable */ 
+    window.toggleLike = async () => { 
         if(!auth.currentUser) { openAuthModal(); return; }
         const btn = document.getElementById('likeBtn');
         const isLiked = btn.classList.contains('like-active');
@@ -574,19 +732,28 @@
             }
             const freshUser = await getDoc(doc(db, "users", auth.currentUser.uid));
             userData = freshUser.data();
-        } catch(e) { console.error(e); }
+        } catch(e) { 
+            console.error(e); 
+            showFastToast("Error updating like", true);
+        }
     };
-    window.previewUpload = (input) => { if(input.files[0]) { selectedFile = input.files[0]; document.getElementById('uploadImgPreview').src = URL.createObjectURL(selectedFile); document.getElementById('uploadImgPreview').classList.remove('hidden'); document.getElementById('uploadPlaceholder').classList.add('hidden'); } };
-    window.startUpload = async () => { /* unchanged core */ };
-    window.setMethod = (m) => { withdrawMethod = m; document.getElementById('selEasypaisa').style.borderColor = m === 'Easypaisa' ? '#6C63FF' : '#e5e7eb'; document.getElementById('selJazzcash').style.borderColor = m === 'Jazzcash' ? '#6C63FF' : '#e5e7eb'; };
-    window.requestWithdraw = () => { const name = document.getElementById('wdName').value, num = document.getElementById('wdNumber').value; if(!withdrawMethod || !name || !num) return showFastToast("Fill all fields", true); if(!userData || userData.earnings < 30) return showFastToast("Minimum $30 required to withdraw", true); showFastToast("Withdrawal request submitted (24-48h)"); };
-    window.copyShareLink = () => { navigator.clipboard.writeText(window.location.href); showFastToast("Link copied"); };
+    
+    window.previewUpload = (input) => { 
+        if(input.files[0]) { 
+            selectedFile = input.files[0]; 
+            document.getElementById('uploadImgPreview').src = URL.createObjectURL(selectedFile); 
+            document.getElementById('uploadImgPreview').classList.remove('hidden'); 
+            document.getElementById('uploadPlaceholder').classList.add('hidden'); 
+        } 
+    };
+    
     window.startUpload = async () => {
         const title = document.getElementById('postTitle').value.trim();
         const tagsRaw = document.getElementById('postTags').value;
         if(!selectedFile || !title) return showFastToast("Photo and Title required", true);
         const btn = document.getElementById('postBtn');
-        btn.disabled = true; btn.innerText = "Uploading...";
+        btn.disabled = true; 
+        btn.innerText = "Uploading...";
         try {
             const fd = new FormData();
             fd.append('file', selectedFile);
@@ -595,20 +762,58 @@
             const data = await res.json();
             const tagArray = tagsRaw.split(',').map(x => x.trim().replace('#','')).filter(x=>x);
             await addDoc(collection(db, "posts"), {
-                title, url: data.secure_url, tags: tagArray, publisherId: auth.currentUser.uid,
-                publisherName: userData.name, publisherDp: userData.photo,
-                likes: 0, downloads: 0, impressions: 0, createdAt: serverTimestamp()
+                title, 
+                url: data.secure_url, 
+                tags: tagArray, 
+                publisherId: auth.currentUser.uid,
+                publisherName: userData.name, 
+                publisherDp: userData.photo,
+                likes: 0, 
+                downloads: 0, 
+                impressions: 0, 
+                createdAt: serverTimestamp()
             });
             showFastToast("Photo published successfully");
-            showScreen('profilePage');
+            
+            // Reset upload form
             document.getElementById('postTitle').value = '';
             document.getElementById('postTags').value = '';
             document.getElementById('uploadImgPreview').classList.add('hidden');
             document.getElementById('uploadPlaceholder').classList.remove('hidden');
             selectedFile = null;
-        } catch(e) { showFastToast("Upload Error: "+e.message, true); } finally { btn.disabled = false; btn.innerText = "Publish & Earn"; }
+            
+            // Show profile page with updated posts
+            showScreen('profilePage');
+        } catch(e) { 
+            showFastToast("Upload Error: "+e.message, true); 
+        } finally { 
+            btn.disabled = false; 
+            btn.innerText = "Publish & Earn"; 
+        }
     };
+    
+    window.setMethod = (m) => { 
+        withdrawMethod = m; 
+        document.getElementById('selEasypaisa').style.borderColor = m === 'Easypaisa' ? '#6C63FF' : '#e5e7eb'; 
+        document.getElementById('selJazzcash').style.borderColor = m === 'Jazzcash' ? '#6C63FF' : '#e5e7eb'; 
+    };
+    
+    window.requestWithdraw = () => { 
+        const name = document.getElementById('wdName').value; 
+        const num = document.getElementById('wdNumber').value; 
+        if(!withdrawMethod || !name || !num) return showFastToast("Fill all fields", true); 
+        if(!userData || userData.earnings < 30) return showFastToast("Minimum $30 required to withdraw", true); 
+        showFastToast("Withdrawal request submitted (24-48h)"); 
+    };
+    
+    window.copyShareLink = () => { 
+        navigator.clipboard.writeText(window.location.href); 
+        showFastToast("Link copied"); 
+    };
+    
     document.getElementById('globalSearch').addEventListener('input', (e) => renderFeed(e.target.value));
+    
+    // Initial render
     window.renderFeed();
 </script>
 </body>
