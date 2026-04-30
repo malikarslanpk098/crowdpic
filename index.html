@@ -30,6 +30,49 @@
         .post-card { break-inside: avoid; margin-bottom: 1.25rem; border-radius: 1.25rem; background: white; transition: all 0.25s cubic-bezier(0.2, 0, 0, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; overflow: hidden; border: 1px solid rgba(108,99,255,0.12); }
         .post-card:hover { transform: translateY(-6px); box-shadow: 0 24px 36px -12px rgba(108,99,255,0.22); }
         
+        /* Native Ad Card - matches design seamlessly */
+        .native-ad-card {
+            break-inside: avoid;
+            margin-bottom: 1.25rem;
+            border-radius: 1.25rem;
+            background: linear-gradient(145deg, #ffffff, #fafaff);
+            transition: all 0.25s ease;
+            border: 1px solid rgba(108,99,255,0.15);
+            overflow: hidden;
+            box-shadow: 0 6px 14px rgba(108,99,255,0.08);
+        }
+        .native-ad-card .ad-label {
+            font-size: 10px;
+            letter-spacing: 1px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6C63FF;
+            background: rgba(108,99,255,0.08);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            margin: 12px 12px 0 12px;
+        }
+        .native-ad-inner {
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 280px;
+        }
+        .native-ad-inner #container-4ebfed5c21470d540dd34f2f5342a263 {
+            margin: 0 auto;
+            max-width: 100%;
+        }
+        
+        /* Responsive Ad Container */
+        @media (max-width: 640px) {
+            .native-ad-inner {
+                min-height: 260px;
+                padding: 8px;
+            }
+        }
+        
         /* Masonry Grid - Responsive */
         .masonry-grid { column-count: 2; column-gap: 1.2rem; }
         @media (min-width: 640px) { .masonry-grid { column-count: 3; } }
@@ -73,6 +116,31 @@
         /* Lazy loading blur effect */
         .lazy-img { transition: filter 0.2s ease; }
         .lazy-img.loaded { filter: blur(0); }
+        
+        /* Social bar minimal styling (Adsterra Social Bar) - clean and non-intrusive */
+        .social-ad-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
+            transition: transform 0.3s ease;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .social-ad-container {
+            background: rgba(0,0,0,0.02);
+            backdrop-filter: blur(0px);
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid rgba(108,99,255,0.2);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        }
+        @media (max-width: 640px) {
+            .social-ad-wrapper {
+                bottom: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -286,10 +354,19 @@
 
 <div id="customToast" class="toast-msg opacity-0 pointer-events-none transition-all duration-300"></div>
 
+<!-- ========================================== -->
+<!-- ADSTERRA SOCIAL BAR (Clean notification style) -->
+<!-- Inserted before closing body tag as requested -->
+<div class="social-ad-wrapper">
+    <div class="social-ad-container">
+        <script src="https://pl29291299.profitablecpmratenetwork.com/cb/36/12/cb3612cca8a603b7418232ddc1a05a3b.js"></script>
+    </div>
+</div>
+<!-- ========================================== -->
+
 <script type="module">
     // ============================================
     // CONFIGURATION - Environment Variables
-    // Note: In production, move these to a .env file
     // ============================================
     const CONFIG = {
         firebase: {
@@ -306,53 +383,95 @@
         }
     };
     
-    // Cloudinary URL optimizer with f_auto,q_auto, dynamic resizing, and watermark
+    // Cloudinary URL optimizer
     function optimizeCloudinaryUrl(url, width = null, height = null, addWatermark = false) {
         if (!url || !url.includes('cloudinary')) return url;
-        // Extract public ID from Cloudinary URL
         const parts = url.split('/upload/');
         if (parts.length < 2) return url;
         let transformations = 'f_auto,q_auto';
         if (width) transformations += `,w_${width}`;
         if (height) transformations += `,h_${height}`;
-        if (addWatermark) {
-            transformations += `,l_logo_watermark,g_north_west,x_20,y_20,o_30`;
-        }
+        if (addWatermark) transformations += `,l_logo_watermark,g_north_west,x_20,y_20,o_30`;
         return `${parts[0]}/upload/${transformations}/${parts[1]}`;
     }
     
-    // Show skeleton loaders while fetching feed
-    function showSkeletonLoaders(container, count = 8) {
-        container.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-            const skeleton = document.createElement('div');
-            skeleton.className = 'skeleton-card';
-            skeleton.innerHTML = `
-                <div class="skeleton-image"></div>
-                <div class="skeleton-text"></div>
-                <div class="skeleton-text-sm"></div>
-            `;
-            container.appendChild(skeleton);
-        }
-    }
-    
-    // Lazy load image observer
-    function lazyLoadImages() {
-        const images = document.querySelectorAll('img[data-src]');
-        const observer = new IntersectionObserver((entries) => {
+    // Helper: Create Native Ad Card (matches post card design) - inserted after every 4th post
+    function createNativeAdCard() {
+        const adCard = document.createElement('div');
+        adCard.className = 'native-ad-card';
+        adCard.innerHTML = `
+            <div class="ad-label"><i class="fas fa-ad"></i> Sponsored</div>
+            <div class="native-ad-inner">
+                <div id="container-4ebfed5c21470d540dd34f2f5342a263"></div>
+            </div>
+        `;
+        // Lazy load ad script only when ad card enters viewport (performance)
+        const adScript = document.createElement('script');
+        adScript.async = true;
+        adScript.setAttribute('data-cfasync', 'false');
+        adScript.src = "https://pl29291300.profitablecpmratenetwork.com/4ebfed5c21470d540dd34f2f5342a263/invoke.js";
+        const observer = new IntersectionObserver((entries, obs) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.add('loaded');
-                    img.removeAttribute('data-src');
-                    observer.unobserve(img);
+                    if (!adCard.querySelector('script[src*="4ebfed5c"]')) {
+                        adCard.querySelector('.native-ad-inner').appendChild(adScript);
+                    }
+                    obs.unobserve(adCard);
                 }
             });
-        }, { rootMargin: '100px' });
-        images.forEach(img => observer.observe(img));
+        }, { threshold: 0.1 });
+        observer.observe(adCard);
+        return adCard;
     }
     
+    // Modified renderFeed with native ads after every 4th image card (dynamic insertion, responsive)
+    window.renderFeed = async (searchTerm = "") => {
+        const container = document.getElementById('feed');
+        // Show skeleton loaders
+        container.innerHTML = '';
+        for(let i = 0; i < 8; i++) {
+            const skeleton = document.createElement('div');
+            skeleton.className = 'skeleton-card';
+            skeleton.innerHTML = `<div class="skeleton-image"></div><div class="skeleton-text"></div><div class="skeleton-text-sm"></div>`;
+            container.appendChild(skeleton);
+        }
+        
+        const snap = await getDocs(collection(db, "posts"));
+        const allPosts = []; 
+        snap.forEach(docSnap => { const p = docSnap.data(); p.id = docSnap.id; allPosts.push(p); });
+        allPosts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+        
+        container.innerHTML = '';
+        let hasAny = false;
+        const filteredPosts = [];
+        allPosts.forEach(p => {
+            const lowerSearch = (searchTerm || "").toLowerCase().replace('#','');
+            const match = !lowerSearch || (p.title && p.title.toLowerCase().includes(lowerSearch)) || (p.tags || []).some(tag => tag.toLowerCase().includes(lowerSearch));
+            if(match) filteredPosts.push(p);
+        });
+        
+        // Insert native ads after every 4th post (position index: 3, 7, 11...)
+        for (let i = 0; i < filteredPosts.length; i++) {
+            const post = filteredPosts[i];
+            const card = document.createElement('div'); 
+            card.className = 'post-card';
+            const optimizedThumb = optimizeCloudinaryUrl(post.url, 400, null, false);
+            card.innerHTML = `<div class="post-image-wrapper relative"><img src="${optimizedThumb}" class="w-full" loading="lazy" alt="${post.title || 'Photo'}" onerror="this.src='https://via.placeholder.com/400x300?text=Not+Found'"><div class="absolute inset-0 bg-gray-200 flex items-center justify-center" style="z-index:-1"><i class="fas fa-image text-gray-400 text-3xl"></i></div></div><div class="p-3"><p class="font-bold text-sm truncate">${post.title || 'Untitled'}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${post.publisherName || 'Anonymous'}</span><span><i class="fas fa-heart text-pink-400"></i> ${post.likes || 0}</span></div></div>`;
+            card.onclick = () => openDetail(post);
+            container.appendChild(card);
+            hasAny = true;
+            
+            // Insert native ad after every 4th post (index 3,7,11... and not last if needed)
+            if ((i + 1) % 4 === 0 && (i + 1) !== filteredPosts.length) {
+                container.appendChild(createNativeAdCard());
+            }
+        }
+        
+        // Edge: if posts less than 4 but >0, no ad for initial but fine.
+        if(!hasAny) container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">No matching photos. Try different tags.</div>';
+    };
+    
+    // Import Firebase modules (Keep existing)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, increment, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -550,33 +669,6 @@
         document.getElementById('statTotalLikes').innerText = totalLikes;
         document.getElementById('profileImpressionsCount').innerText = totalImpressions;
     }
-
-    window.renderFeed = async (searchTerm = "") => {
-        const container = document.getElementById('feed');
-        showSkeletonLoaders(container, 8);
-        
-        const snap = await getDocs(collection(db, "posts"));
-        const allPosts = []; 
-        snap.forEach(docSnap => { const p = docSnap.data(); p.id = docSnap.id; allPosts.push(p); });
-        allPosts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-        
-        container.innerHTML = '';
-        let hasAny = false;
-        allPosts.forEach(p => {
-            const lowerSearch = (searchTerm || "").toLowerCase().replace('#','');
-            const match = !lowerSearch || (p.title && p.title.toLowerCase().includes(lowerSearch)) || (p.tags || []).some(tag => tag.toLowerCase().includes(lowerSearch));
-            if(match) {
-                hasAny = true;
-                const card = document.createElement('div'); 
-                card.className = 'post-card';
-                const optimizedThumb = optimizeCloudinaryUrl(p.url, 400, null, false);
-                card.innerHTML = `<div class="post-image-wrapper relative"><img src="${optimizedThumb}" class="w-full" loading="lazy" alt="${p.title || 'Photo'}" onerror="this.src='https://via.placeholder.com/400x300?text=Not+Found'"><div class="absolute inset-0 bg-gray-200 flex items-center justify-center" style="z-index:-1"><i class="fas fa-image text-gray-400 text-3xl"></i></div></div><div class="p-3"><p class="font-bold text-sm truncate">${p.title || 'Untitled'}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${p.publisherName || 'Anonymous'}</span><span><i class="fas fa-heart text-pink-400"></i> ${p.likes || 0}</span></div></div>`;
-                card.onclick = () => openDetail(p);
-                container.appendChild(card);
-            }
-        });
-        if(!hasAny) container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">No matching photos. Try different tags.</div>';
-    };
 
     window.openDetail = async (post) => {
         activePost = post;
