@@ -20,18 +20,86 @@
     
     <style>
         * { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
-        :root { --primary: #6C63FF; --skeleton-bg: #e2e8f0; --skeleton-shimmer: #f1f5f9; }
+        :root { 
+            --primary: #6C63FF; 
+            --skeleton-bg: #e2e8f0; 
+            --skeleton-shimmer: #f1f5f9;
+            --gradient-start: #6C63FF;
+            --gradient-end: #4a42d0;
+        }
         body { background: #f5f7fc; overflow-x: hidden; }
         
         /* Glass Navigation */
-        .glass-nav { background: rgba(255,255,255,0.96); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #eef2ff; }
-        .brand-logo { height: 56px; width: auto; object-fit: contain; transition: transform 0.2s ease; }
+        .glass-nav { 
+            background: rgba(255,255,255,0.96); 
+            backdrop-filter: blur(12px); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            border-bottom: 1px solid #eef2ff; 
+        }
+        .brand-logo { 
+            height: 56px; 
+            width: auto; 
+            object-fit: contain; 
+            transition: transform 0.2s ease; 
+        }
+        .brand-logo:hover { transform: scale(1.02); }
         
         /* Post Cards - Masonry Layout */
-        .post-card { break-inside: avoid; margin-bottom: 1.25rem; border-radius: 1.25rem; background: white; transition: all 0.25s cubic-bezier(0.2, 0, 0, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; overflow: hidden; border: 1px solid rgba(108,99,255,0.12); }
-        .post-card:hover { transform: translateY(-6px); box-shadow: 0 24px 36px -12px rgba(108,99,255,0.22); }
+        .post-card { 
+            break-inside: avoid; 
+            margin-bottom: 1.25rem; 
+            border-radius: 1.25rem; 
+            background: white; 
+            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.05); 
+            cursor: pointer; 
+            overflow: hidden; 
+            border: 1px solid rgba(108,99,255,0.12);
+            position: relative;
+        }
+        .post-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 24px 40px -12px rgba(108,99,255,0.25);
+            border-color: rgba(108,99,255,0.3);
+        }
+        .post-card .post-image-wrapper { position: relative; overflow: hidden; }
+        .post-card img { 
+            width: 100%; 
+            display: block; 
+            transition: transform 0.4s ease; 
+        }
+        .post-card:hover img { transform: scale(1.03); }
+        .post-card .post-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px 12px 12px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.4));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .post-card:hover .post-overlay { opacity: 1; }
+        .post-card .post-overlay .download-btn {
+            background: white;
+            color: #6C63FF;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .post-card .post-overlay .download-btn:hover {
+            background: #6C63FF;
+            color: white;
+            transform: scale(1.05);
+        }
         
-        /* Native Ad Card - matches design seamlessly */
+        /* Native Ad Card */
         .native-ad-card {
             break-inside: avoid;
             margin-bottom: 1.25rem;
@@ -68,57 +136,210 @@
         
         /* Responsive Ad Container */
         @media (max-width: 640px) {
-            .native-ad-inner {
-                min-height: 260px;
-                padding: 8px;
-            }
+            .native-ad-inner { min-height: 260px; padding: 8px; }
         }
         
-        /* Masonry Grid - Responsive */
+        /* Masonry Grid */
         .masonry-grid { column-count: 2; column-gap: 1.2rem; }
         @media (min-width: 640px) { .masonry-grid { column-count: 3; } }
         @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
         @media (min-width: 1920px) { .masonry-grid { column-count: 5; } }
         
-        /* Skeleton Loader - Shimmer Effect */
-        .skeleton-card { break-inside: avoid; margin-bottom: 1.25rem; border-radius: 1.25rem; background: white; overflow: hidden; border: 1px solid rgba(108,99,255,0.12); }
-        .skeleton-image { width: 100%; aspect-ratio: 4/3; background: linear-gradient(110deg, var(--skeleton-bg) 8%, var(--skeleton-shimmer) 18%, var(--skeleton-bg) 33%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; border-radius: 1.25rem 1.25rem 0 0; }
-        .skeleton-text { height: 16px; background: linear-gradient(110deg, var(--skeleton-bg) 8%, var(--skeleton-shimmer) 18%, var(--skeleton-bg) 33%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; border-radius: 8px; margin: 12px; width: 80%; }
+        /* Skeleton Loader */
+        .skeleton-card { 
+            break-inside: avoid; 
+            margin-bottom: 1.25rem; 
+            border-radius: 1.25rem; 
+            background: white; 
+            overflow: hidden; 
+            border: 1px solid rgba(108,99,255,0.12); 
+        }
+        .skeleton-image { 
+            width: 100%; 
+            aspect-ratio: 4/3; 
+            background: linear-gradient(110deg, var(--skeleton-bg) 8%, var(--skeleton-shimmer) 18%, var(--skeleton-bg) 33%); 
+            background-size: 200% 100%; 
+            animation: shimmer 1.2s linear infinite; 
+            border-radius: 1.25rem 1.25rem 0 0; 
+        }
+        .skeleton-text { 
+            height: 16px; 
+            background: linear-gradient(110deg, var(--skeleton-bg) 8%, var(--skeleton-shimmer) 18%, var(--skeleton-bg) 33%); 
+            background-size: 200% 100%; 
+            animation: shimmer 1.2s linear infinite; 
+            border-radius: 8px; 
+            margin: 12px; 
+            width: 80%; 
+        }
         .skeleton-text-sm { width: 60%; height: 12px; margin: 8px 12px 12px 12px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         
         /* Modal & Form Styles */
-        .custom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 2000; align-items: center; justify-content: center; padding: 1rem; }
-        .btn-gradient { background: linear-gradient(105deg, #6C63FF, #4a42d0); color: white; transition: all 0.2s; border: none; cursor: pointer; font-weight: 600; }
+        .custom-modal { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(6px); 
+            z-index: 2000; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 1rem; 
+        }
+        .custom-modal.active { display: flex; }
+        
+        .btn-gradient { 
+            background: linear-gradient(105deg, #6C63FF, #4a42d0); 
+            color: white; 
+            transition: all 0.2s; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+        }
         .btn-gradient:hover { opacity: 0.92; transform: scale(0.98); }
-        .auth-tab.active { border-bottom: 3px solid #6C63FF; color: #6C63FF; font-weight: 700; }
+        .btn-gradient:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .auth-tab.active { 
+            border-bottom: 3px solid #6C63FF; 
+            color: #6C63FF; 
+            font-weight: 700; 
+        }
         .like-active { color: #ef4444 !important; transform: scale(1.12); }
-        .toast-msg { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 60px; font-weight: 500; z-index: 2500; backdrop-filter: blur(8px); font-size: 0.9rem; box-shadow: 0 12px 25px -8px black; pointer-events: none; transition: opacity 0.2s; }
-        .back-btn { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #4b44d1; cursor: pointer; margin-bottom: 20px; width: fit-content; transition: 0.2s; }
-        .back-btn:hover { transform: translateX(-5px); }
+        
+        .toast-msg { 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #1e293b; 
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 60px; 
+            font-weight: 500; 
+            z-index: 2500; 
+            backdrop-filter: blur(8px); 
+            font-size: 0.9rem; 
+            box-shadow: 0 12px 25px -8px black; 
+            pointer-events: none; 
+            transition: all 0.3s ease;
+        }
+        .toast-msg.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast-msg.hide { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        
+        .back-btn { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-weight: 600; 
+            color: #4b44d1; 
+            cursor: pointer; 
+            margin-bottom: 20px; 
+            width: fit-content; 
+            transition: 0.2s; 
+        }
+        .back-btn:hover { transform: translateX(-5px); color: #6C63FF; }
+        
         img { user-select: none; }
         .stat-number { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
         
         /* Profile Grid */
-        .profile-posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
-        .profile-post-card { position: relative; border-radius: 1rem; overflow: hidden; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; cursor: pointer; }
-        .profile-post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(108,99,255,0.25); }
-        .profile-post-card img { width: 100%; height: 200px; object-fit: cover; }
+        .profile-posts-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 1rem; 
+        }
+        .profile-post-card { 
+            position: relative; 
+            border-radius: 1rem; 
+            overflow: hidden; 
+            background: white; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+        }
+        .profile-post-card:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 8px 20px rgba(108,99,255,0.25); 
+        }
+        .profile-post-card img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: cover; 
+        }
         .profile-post-info { padding: 12px; background: white; }
-        .profile-post-info h4 { font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #1e293b; }
-        .profile-post-stats { display: flex; gap: 12px; font-size: 12px; color: #64748b; }
-        .profile-delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(220, 38, 38, 0.9); color: white; border: none; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; z-index: 10; }
-        .profile-delete-btn:hover { background: #dc2626; transform: scale(1.05); }
-        .admin-badge { background: linear-gradient(135deg, #6C63FF, #4a42d0); border-radius: 30px; padding: 4px 12px; font-size: 12px; font-weight: bold; color: white; margin-left: 10px; cursor: pointer; transition: transform 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .profile-post-info h4 { 
+            font-weight: 600; 
+            font-size: 14px; 
+            margin-bottom: 8px; 
+            color: #1e293b; 
+        }
+        .profile-post-stats { 
+            display: flex; 
+            gap: 12px; 
+            font-size: 12px; 
+            color: #64748b; 
+        }
+        .profile-delete-btn { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: rgba(220, 38, 38, 0.9); 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            z-index: 10; 
+        }
+        .profile-delete-btn:hover { 
+            background: #dc2626; 
+            transform: scale(1.05); 
+        }
+        
+        .admin-badge { 
+            background: linear-gradient(135deg, #6C63FF, #4a42d0); 
+            border-radius: 30px; 
+            padding: 4px 12px; 
+            font-size: 12px; 
+            font-weight: bold; 
+            color: white; 
+            margin-left: 10px; 
+            cursor: pointer; 
+            transition: transform 0.2s; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+        }
         .admin-badge:hover { transform: scale(1.02); }
-        .banned-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); }
-        .banned-card { background: white; padding: 2rem; border-radius: 2rem; text-align: center; border: 2px solid #ef4444; }
+        
+        .banned-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.95); 
+            z-index: 10000; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            flex-direction: column; 
+            backdrop-filter: blur(8px); 
+        }
+        .banned-overlay.active { display: flex; }
+        .banned-card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 2rem; 
+            text-align: center; 
+            border: 2px solid #ef4444; 
+        }
         
         /* Lazy loading blur effect */
         .lazy-img { transition: filter 0.2s ease; }
         .lazy-img.loaded { filter: blur(0); }
         
-        /* Social bar minimal styling (Adsterra Social Bar) - clean and non-intrusive */
+        /* Social bar minimal styling */
         .social-ad-wrapper {
             position: fixed;
             bottom: 0;
@@ -138,10 +359,85 @@
             box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
         }
         @media (max-width: 640px) {
-            .social-ad-wrapper {
-                bottom: 0;
-            }
+            .social-ad-wrapper { bottom: 0; }
         }
+        
+        /* Trending Tags */
+        .trending-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px 0 16px;
+            border-bottom: 1px solid #eef2ff;
+            margin-bottom: 16px;
+        }
+        .trending-tag {
+            background: #f0f0ff;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6C63FF;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .trending-tag:hover {
+            background: #6C63FF;
+            color: white;
+            transform: scale(1.02);
+        }
+        .trending-tag i { margin-right: 4px; }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(108,99,255,0.1);
+            border-top-color: #6C63FF;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Responsive Typography */
+        @media (max-width: 480px) {
+            .glass-nav { padding: 8px 12px; }
+            .brand-logo { height: 40px; }
+            #globalSearch { font-size: 13px; padding: 8px 14px; }
+            .post-card { border-radius: 12px; }
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #6C63FF; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a42d0; }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeInUp 0.5s ease forwards; }
+        .animate-in-delay { animation: fadeInUp 0.5s ease 0.1s forwards; }
+        
+        /* Category Pills */
+        .category-pill {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .category-pill.nature { background: #dcfce7; color: #166534; }
+        .category-pill.urban { background: #dbeafe; color: #1e40af; }
+        .category-pill.portrait { background: #fce7f3; color: #9d174d; }
+        .category-pill.food { background: #fef3c7; color: #92400e; }
+        .category-pill.travel { background: #e0e7ff; color: #3730a3; }
+        .category-pill.tech { background: #e5e7eb; color: #1f2937; }
     </style>
 </head>
 <body>
@@ -152,7 +448,7 @@
     </div>
     <div class="flex-1 min-w-[180px] max-w-md">
         <div class="relative">
-            <input type="text" id="globalSearch" placeholder="Search tags or photos..." class="w-full bg-gray-100/80 border-none rounded-full py-2.5 pl-5 pr-10 focus:ring-2 focus:ring-purple-400 outline-none text-sm">
+            <input type="text" id="globalSearch" placeholder="Search photos, tags, or creators..." class="w-full bg-gray-100/80 border-none rounded-full py-2.5 pl-5 pr-10 focus:ring-2 focus:ring-purple-400 outline-none text-sm">
             <i class="fas fa-search absolute right-4 top-3.5 text-gray-400"></i>
         </div>
     </div>
@@ -165,7 +461,7 @@
     </div>
 </nav>
 
-<div id="bannedOverlay" style="display: none;" class="banned-overlay">
+<div id="bannedOverlay" class="banned-overlay">
     <div class="banned-card">
         <i class="fas fa-ban text-red-500 text-6xl mb-4"></i>
         <h2 class="text-2xl font-bold text-gray-800 mb-2">Account Restricted</h2>
@@ -176,7 +472,7 @@
 </div>
 
 <div id="authModal" class="custom-modal">
-    <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl relative">
+    <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl relative animate-in">
         <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
         <div class="flex border-b mb-6">
             <button id="tabLogin" onclick="switchAuthTab('login')" class="auth-tab active flex-1 py-2 font-bold text-lg">Login</button>
@@ -200,6 +496,7 @@
 </div>
 
 <main class="max-w-7xl mx-auto p-4 md:p-5">
+    <!-- Landing Screen -->
     <section id="landingScreen" class="py-12 text-center">
         <div class="flex justify-center mb-6">
             <img src="https://i.ibb.co/1tt0Lmwh/Untitled-design-1-removebg-preview.png" class="w-56 md:w-64 drop-shadow-xl" alt="CrowdPic Brand">
@@ -221,12 +518,27 @@
         </div>
     </section>
 
+    <!-- Home / Feed Screen -->
     <section id="homeScreen" class="hidden">
+        <div class="trending-tags">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide mr-2"><i class="fas fa-fire text-orange-500"></i> Trending:</span>
+            <span class="trending-tag" onclick="renderFeed('nature')"><i class="fas fa-tree"></i> Nature</span>
+            <span class="trending-tag" onclick="renderFeed('urban')"><i class="fas fa-city"></i> Urban</span>
+            <span class="trending-tag" onclick="renderFeed('portrait')"><i class="fas fa-user"></i> Portrait</span>
+            <span class="trending-tag" onclick="renderFeed('food')"><i class="fas fa-utensils"></i> Food</span>
+            <span class="trending-tag" onclick="renderFeed('travel')"><i class="fas fa-globe"></i> Travel</span>
+            <span class="trending-tag" onclick="renderFeed('tech')"><i class="fas fa-microchip"></i> Tech</span>
+        </div>
         <div id="feed" class="masonry-grid">
             <!-- Skeleton loaders will be shown dynamically -->
         </div>
+        <div id="feedEndMessage" class="text-center py-8 text-gray-400 hidden">
+            <i class="fas fa-images text-4xl mb-2 block"></i>
+            <p>You've reached the end of the feed</p>
+        </div>
     </section>
 
+    <!-- Upload Screen -->
     <section id="uploadScreen" class="hidden max-w-2xl mx-auto">
         <div onclick="showScreen('homeScreen')" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Feed</div>
         <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl">
@@ -243,6 +555,7 @@
         </div>
     </section>
 
+    <!-- Profile Screen -->
     <section id="profilePage" class="hidden">
         <div onclick="showScreen('homeScreen')" class="back-btn"><i class="fas fa-arrow-left"></i> Explore Feed</div>
         <div class="bg-white rounded-3xl p-6 shadow-xl mb-8 text-center">
@@ -254,7 +567,7 @@
             </div>
             <input type="file" id="dpUploadInput" hidden accept="image/*" onchange="uploadProfilePicture(this)">
             <h2 id="userName" class="text-2xl font-bold uppercase tracking-wide text-gray-800 mt-2"></h2>
-            <div class="flex justify-center gap-4 mt-5">
+            <div class="flex justify-center gap-4 mt-5 flex-wrap">
                 <button onclick="showScreen('studioScreen')" class="bg-purple-600 text-white px-5 py-2 rounded-full text-sm font-semibold shadow">Studio & Earnings</button>
                 <button onclick="handleLogout()" class="bg-gray-200 px-5 py-2 rounded-full text-sm font-semibold">Logout</button>
             </div>
@@ -279,6 +592,7 @@
         </div>
     </section>
 
+    <!-- Studio Screen -->
     <section id="studioScreen" class="hidden">
         <div onclick="showScreen('profilePage')" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Profile</div>
         <h2 class="text-3xl font-extrabold text-purple-800 mb-6 flex items-center gap-2"><i class="fas fa-chart-line"></i> Creator Studio</h2>
@@ -296,7 +610,7 @@
                 <h3 class="text-4xl font-black text-pink-500 stat-number" id="statTotalLikes">0</h3>
             </div>
         </div>
-        <div class="bg-indigo-50 rounded-2xl p-4 mb-8 flex justify-between items-center">
+        <div class="bg-indigo-50 rounded-2xl p-4 mb-8 flex justify-between items-center flex-wrap gap-2">
             <span class="font-semibold"><i class="fas fa-eye text-indigo-600"></i> Profile Impressions (Post Views)</span>
             <span id="profileImpressionsCount" class="bg-white px-5 py-1.5 rounded-full font-bold text-indigo-700 shadow-sm stat-number">0</span>
         </div>
@@ -315,6 +629,7 @@
         </div>
     </section>
 
+    <!-- Post Detail Screen -->
     <section id="postDetail" class="hidden">
         <div onclick="showScreen('homeScreen')" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Feed</div>
         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden grid md:grid-cols-2 gap-0 relative">
@@ -330,7 +645,7 @@
             </div>
             <div class="p-6 md:p-8 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                         <div class="flex items-center gap-3">
                             <img id="detailUserDp" class="w-12 h-12 rounded-full border-2 border-purple-300 object-cover">
                             <h4 id="detailUserName" class="font-bold text-purple-700 uppercase text-sm"></h4>
@@ -339,8 +654,9 @@
                     </div>
                     <h2 id="detailTitle" class="text-2xl font-bold mb-3"></h2>
                     <div id="detailTags" class="flex flex-wrap gap-2 mb-5"></div>
+                    <span id="detailCategory" class="category-pill nature hidden"></span>
                 </div>
-                <div class="flex items-center justify-between pt-4 border-t mt-3">
+                <div class="flex items-center justify-between pt-4 border-t mt-3 flex-wrap gap-2">
                     <div class="flex items-center gap-4">
                         <button onclick="toggleLike()" id="likeBtn" class="text-gray-400 text-3xl transition hover:scale-110"><i class="fas fa-heart"></i></button>
                         <div><span id="detailLikes" class="text-xl font-bold stat-number">0</span> <span class="text-gray-500">likes</span></div>
@@ -353,11 +669,10 @@
     </section>
 </main>
 
-<div id="customToast" class="toast-msg opacity-0 pointer-events-none transition-all duration-300"></div>
+<div id="customToast" class="toast-msg hide"></div>
 
 <!-- ========================================== -->
-<!-- ADSTERRA SOCIAL BAR (Clean notification style) -->
-<!-- Inserted before closing body tag as requested -->
+<!-- ADSTERRA SOCIAL BAR -->
 <div class="social-ad-wrapper">
     <div class="social-ad-container">
         <script src="https://pl29291299.profitablecpmratenetwork.com/cb/36/12/cb3612cca8a603b7418232ddc1a05a3b.js"></script>
@@ -367,7 +682,7 @@
 
 <script type="module">
     // ============================================
-    // CONFIGURATION - Environment Variables
+    // CONFIGURATION
     // ============================================
     const CONFIG = {
         firebase: {
@@ -396,17 +711,16 @@
         return `${parts[0]}/upload/${transformations}/${parts[1]}`;
     }
     
-    // Helper: Create Native Ad Card (matches post card design) - inserted after every 4th post
+    // Helper: Create Native Ad Card
     function createNativeAdCard() {
         const adCard = document.createElement('div');
-        adCard.className = 'native-ad-card';
+        adCard.className = 'native-ad-card animate-in';
         adCard.innerHTML = `
             <div class="ad-label"><i class="fas fa-ad"></i> Sponsored</div>
             <div class="native-ad-inner">
                 <div id="container-4ebfed5c21470d540dd34f2f5342a263"></div>
             </div>
         `;
-        // Lazy load ad script only when ad card enters viewport (performance)
         const adScript = document.createElement('script');
         adScript.async = true;
         adScript.setAttribute('data-cfasync', 'false');
@@ -425,54 +739,9 @@
         return adCard;
     }
     
-    // Modified renderFeed with native ads after every 4th image card (dynamic insertion, responsive)
-    window.renderFeed = async (searchTerm = "") => {
-        const container = document.getElementById('feed');
-        // Show skeleton loaders
-        container.innerHTML = '';
-        for(let i = 0; i < 8; i++) {
-            const skeleton = document.createElement('div');
-            skeleton.className = 'skeleton-card';
-            skeleton.innerHTML = `<div class="skeleton-image"></div><div class="skeleton-text"></div><div class="skeleton-text-sm"></div>`;
-            container.appendChild(skeleton);
-        }
-        
-        const snap = await getDocs(collection(db, "posts"));
-        const allPosts = []; 
-        snap.forEach(docSnap => { const p = docSnap.data(); p.id = docSnap.id; allPosts.push(p); });
-        allPosts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-        
-        container.innerHTML = '';
-        let hasAny = false;
-        const filteredPosts = [];
-        allPosts.forEach(p => {
-            const lowerSearch = (searchTerm || "").toLowerCase().replace('#','');
-            const match = !lowerSearch || (p.title && p.title.toLowerCase().includes(lowerSearch)) || (p.tags || []).some(tag => tag.toLowerCase().includes(lowerSearch));
-            if(match) filteredPosts.push(p);
-        });
-        
-        // Insert native ads after every 4th post (position index: 3, 7, 11...)
-        for (let i = 0; i < filteredPosts.length; i++) {
-            const post = filteredPosts[i];
-            const card = document.createElement('div'); 
-            card.className = 'post-card';
-            const optimizedThumb = optimizeCloudinaryUrl(post.url, 400, null, false);
-            card.innerHTML = `<div class="post-image-wrapper relative"><img src="${optimizedThumb}" class="w-full" loading="lazy" alt="${post.title || 'Photo'}" onerror="this.src='https://via.placeholder.com/400x300?text=Not+Found'"><div class="absolute inset-0 bg-gray-200 flex items-center justify-center" style="z-index:-1"><i class="fas fa-image text-gray-400 text-3xl"></i></div></div><div class="p-3"><p class="font-bold text-sm truncate">${post.title || 'Untitled'}</p><div class="flex justify-between text-xs text-gray-400 mt-1"><span>${post.publisherName || 'Anonymous'}</span><span><i class="fas fa-heart text-pink-400"></i> ${post.likes || 0}</span></div></div>`;
-            card.onclick = () => openDetail(post);
-            container.appendChild(card);
-            hasAny = true;
-            
-            // Insert native ad after every 4th post (index 3,7,11... and not last if needed)
-            if ((i + 1) % 4 === 0 && (i + 1) !== filteredPosts.length) {
-                container.appendChild(createNativeAdCard());
-            }
-        }
-        
-        // Edge: if posts less than 4 but >0, no ad for initial but fine.
-        if(!hasAny) container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">No matching photos. Try different tags.</div>';
-    };
-    
-    // Import Firebase modules (Keep existing)
+    // ============================================
+    // FIREBASE IMPORTS
+    // ============================================
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, increment, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -481,42 +750,760 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // ============================================
+    // STATE
+    // ============================================
     let userData = null;
     let activePost = null;
     let authMode = 'login';
     let selectedFile = null;
     let withdrawMethod = '';
+    let isUploading = false;
+    let currentFeedPosts = [];
+    let feedEndReached = false;
 
+    // ============================================
+    // TOAST NOTIFICATION
+    // ============================================
     function showFastToast(msg, isError = false) {
         const toast = document.getElementById('customToast');
-        toast.innerHTML = msg;
-        toast.classList.remove('opacity-0');
-        toast.classList.add('opacity-100');
-        toast.style.background = isError ? "#b91c1c" : "#1e293b";
-        setTimeout(() => {
-            toast.classList.remove('opacity-100');
-            toast.classList.add('opacity-0');
-        }, 2500);
+        toast.textContent = msg;
+        toast.className = 'toast-msg show';
+        toast.style.background = isError ? '#b91c1c' : '#1e293b';
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => {
+            toast.className = 'toast-msg hide';
+        }, 2800);
     }
 
+    // ============================================
+    // IMAGE LOADING
+    // ============================================
     async function loadImageWithSkeleton(imgElement, imageUrl) {
         const loaderDiv = document.getElementById('detailLoaderSkeleton');
         if(!loaderDiv) return;
         loaderDiv.style.display = 'flex';
         imgElement.style.display = 'none';
+        imgElement.classList.remove('opacity-100');
         const optimizedUrl = optimizeCloudinaryUrl(imageUrl, 800, null, false);
         imgElement.src = optimizedUrl;
-        if(imgElement.complete) finalizeImageLoad(imgElement, loaderDiv);
-        else { imgElement.onload = () => finalizeImageLoad(imgElement, loaderDiv); imgElement.onerror = () => { showFastToast("Failed to load image", true); loaderDiv.style.display = 'none'; imgElement.style.display = 'block'; }; }
+        if(imgElement.complete) {
+            finalizeImageLoad(imgElement, loaderDiv);
+        } else {
+            imgElement.onload = () => finalizeImageLoad(imgElement, loaderDiv);
+            imgElement.onerror = () => {
+                showFastToast("Failed to load image", true);
+                loaderDiv.style.display = 'none';
+                imgElement.style.display = 'block';
+                imgElement.src = 'https://via.placeholder.com/800x600?text=Image+Not+Available';
+            };
+        }
     }
-    function finalizeImageLoad(imgElement, loaderDiv) { loaderDiv.style.display = 'none'; imgElement.style.display = 'block'; setTimeout(() => imgElement.classList.add('opacity-100'), 30); }
+    
+    function finalizeImageLoad(imgElement, loaderDiv) {
+        loaderDiv.style.display = 'none';
+        imgElement.style.display = 'block';
+        setTimeout(() => imgElement.classList.add('opacity-100'), 30);
+    }
 
+    // ============================================
+    // RENDER FEED WITH NATIVE ADS
+    // ============================================
+    window.renderFeed = async (searchTerm = "") => {
+        const container = document.getElementById('feed');
+        const endMsg = document.getElementById('feedEndMessage');
+        endMsg.classList.add('hidden');
+        
+        // Show skeleton loaders
+        container.innerHTML = '';
+        for(let i = 0; i < 8; i++) {
+            const skeleton = document.createElement('div');
+            skeleton.className = 'skeleton-card animate-in';
+            skeleton.innerHTML = `<div class="skeleton-image"></div><div class="skeleton-text"></div><div class="skeleton-text-sm"></div>`;
+            container.appendChild(skeleton);
+        }
+        
+        try {
+            const snap = await getDocs(collection(db, "posts"));
+            const allPosts = []; 
+            snap.forEach(docSnap => { 
+                const p = docSnap.data(); 
+                p.id = docSnap.id; 
+                allPosts.push(p); 
+            });
+            allPosts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+            
+            container.innerHTML = '';
+            
+            const lowerSearch = (searchTerm || "").toLowerCase().replace(/^#/, '');
+            const filteredPosts = allPosts.filter(p => {
+                if (!lowerSearch) return true;
+                const titleMatch = p.title && p.title.toLowerCase().includes(lowerSearch);
+                const tagMatch = (p.tags || []).some(tag => tag.toLowerCase().includes(lowerSearch));
+                const publisherMatch = p.publisherName && p.publisherName.toLowerCase().includes(lowerSearch);
+                return titleMatch || tagMatch || publisherMatch;
+            });
+            
+            currentFeedPosts = filteredPosts;
+            
+            if (filteredPosts.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-16 text-gray-400">
+                        <i class="fas fa-search text-5xl mb-4 opacity-30"></i>
+                        <p class="text-lg font-medium">No matching photos found</p>
+                        <p class="text-sm">Try different keywords or browse trending tags above</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            for (let i = 0; i < filteredPosts.length; i++) {
+                const post = filteredPosts[i];
+                const card = document.createElement('div');
+                card.className = 'post-card animate-in';
+                card.style.animationDelay = `${(i % 8) * 0.05}s`;
+                
+                const optimizedThumb = optimizeCloudinaryUrl(post.url, 400, null, false);
+                
+                // Get category from first tag
+                const firstTag = post.tags && post.tags.length > 0 ? post.tags[0].toLowerCase() : '';
+                const categoryMap = {
+                    'nature': 'nature',
+                    'urban': 'urban',
+                    'portrait': 'portrait',
+                    'food': 'food',
+                    'travel': 'travel',
+                    'tech': 'tech'
+                };
+                const category = categoryMap[firstTag] || '';
+                
+                card.innerHTML = `
+                    <div class="post-image-wrapper">
+                        <img src="${optimizedThumb}" loading="lazy" alt="${post.title || 'Photo'}" onerror="this.src='https://via.placeholder.com/400x300?text=Not+Found'">
+                        <div class="post-overlay">
+                            <button class="download-btn" onclick="event.stopPropagation(); window.quickDownload('${post.id}')">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="flex items-start justify-between">
+                            <p class="font-bold text-sm truncate flex-1">${post.title || 'Untitled'}</p>
+                            ${category ? `<span class="category-pill ${category} text-[10px] ml-2 flex-shrink-0">${category}</span>` : ''}
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span class="truncate max-w-[120px]">${post.publisherName || 'Anonymous'}</span>
+                            <span><i class="fas fa-heart text-pink-400"></i> ${post.likes || 0}</span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => openDetail(post);
+                container.appendChild(card);
+                
+                // Insert native ad after every 4th post (but not if it's the last one)
+                if ((i + 1) % 4 === 0 && i + 1 < filteredPosts.length) {
+                    container.appendChild(createNativeAdCard());
+                }
+            }
+            
+            // Show end message if there are posts
+            if (filteredPosts.length > 0) {
+                endMsg.classList.remove('hidden');
+            }
+            
+        } catch(error) {
+            console.error('Feed render error:', error);
+            container.innerHTML = `
+                <div class="col-span-full text-center py-16 text-red-500">
+                    <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                    <p class="text-lg font-medium">Failed to load feed</p>
+                    <p class="text-sm">Please refresh and try again</p>
+                </div>
+            `;
+        }
+    };
+
+    // Quick download from feed
+    window.quickDownload = async (postId) => {
+        const post = currentFeedPosts.find(p => p.id === postId);
+        if (!post) return;
+        const btn = event?.target?.closest?.('.download-btn');
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+            btn.disabled = true;
+            try {
+                const response = await fetch(post.url);
+                if (!response.ok) throw new Error('Network failed');
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `CrowdPic_${post.title?.replace(/[^a-z0-9]/gi, '_') || 'photo'}_${Date.now()}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+                await updateDoc(doc(db, "posts", post.id), { downloads: increment(1) });
+                if (post.publisherId) {
+                    await updateDoc(doc(db, "users", post.publisherId), { 
+                        earnings: increment(0.01), 
+                        downloads: increment(1) 
+                    });
+                }
+                showFastToast("Image saved successfully");
+            } catch(error) {
+                showFastToast("Download failed. Try again.", true);
+            } finally {
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        }
+    };
+
+    // ============================================
+    // AUTH FUNCTIONS
+    // ============================================
+    window.openAuthModal = () => {
+        document.getElementById('authModal').classList.add('active');
+        document.getElementById('authModal').style.display = 'flex';
+    };
+    
+    window.closeAuthModal = () => {
+        document.getElementById('authModal').classList.remove('active');
+        document.getElementById('authModal').style.display = 'none';
+    };
+    
+    window.switchAuthTab = (m) => {
+        authMode = m;
+        const loginTab = document.getElementById('tabLogin');
+        const signupTab = document.getElementById('tabSignup');
+        loginTab.classList.toggle('active', m === 'login');
+        signupTab.classList.toggle('active', m === 'signup');
+        document.getElementById('nameInputGroup').classList.toggle('hidden', m === 'login');
+        document.getElementById('authSubmitBtn').textContent = m === 'login' ? 'Login' : 'Create Account';
+    };
+    
+    window.handleAuthSubmit = async () => {
+        const email = document.getElementById('authEmail').value.trim();
+        const pass = document.getElementById('authPassword').value;
+        const name = document.getElementById('authName').value.trim();
+        
+        if (!email || !pass) {
+            showFastToast("Email and Password required", true);
+            return;
+        }
+        
+        const btn = document.getElementById('authSubmitBtn');
+        const originalText = btn.textContent;
+        btn.textContent = 'Processing...';
+        btn.disabled = true;
+        
+        try {
+            if (authMode === 'signup') {
+                if (!name) {
+                    showFastToast("Full name required", true);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                const defaultPhoto = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff&bold=true&size=128`;
+                await setDoc(doc(db, "users", res.user.uid), { 
+                    uid: res.user.uid, 
+                    name, 
+                    email, 
+                    photo: defaultPhoto, 
+                    earnings: 0, 
+                    downloads: 0, 
+                    likedPosts: [], 
+                    totalImpressions: 0, 
+                    isBanned: false,
+                    createdAt: serverTimestamp()
+                });
+                showFastToast("Account created successfully! 🎉");
+            } else {
+                await signInWithEmailAndPassword(auth, email, pass);
+                showFastToast("Welcome back! 👋");
+            }
+            closeAuthModal();
+        } catch(e) {
+            let errorMsg = e.message;
+            if (errorMsg.includes('user-not-found')) errorMsg = 'No account found with this email';
+            else if (errorMsg.includes('wrong-password')) errorMsg = 'Incorrect password';
+            else if (errorMsg.includes('email-already-in-use')) errorMsg = 'Email already registered';
+            showFastToast(errorMsg, true);
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    };
+    
+    window.handleLogout = () => {
+        signOut(auth).then(() => {
+            showFastToast("Logged out successfully");
+            setTimeout(() => location.reload(), 500);
+        });
+    };
+    
+    async function checkUserBanStatus(userId) {
+        if (!userId) return false;
+        try {
+            const snap = await getDoc(doc(db, "users", userId));
+            if (snap.exists() && snap.data().isBanned === true) {
+                document.getElementById('bannedOverlay').classList.add('active');
+                document.querySelector('main').style.opacity = '0.3';
+                document.querySelector('main').style.pointerEvents = 'none';
+                return true;
+            }
+        } catch(e) {
+            console.error('Ban check error:', e);
+        }
+        document.getElementById('bannedOverlay').classList.remove('active');
+        document.querySelector('main').style.opacity = '1';
+        document.querySelector('main').style.pointerEvents = 'auto';
+        return false;
+    }
+
+    // ============================================
+    // AUTH STATE OBSERVER
+    // ============================================
+    onAuthStateChanged(auth, async (u) => {
+        const guestBtn = document.getElementById('guestAuthBtn');
+        const adminLink = document.getElementById('adminPanelLink');
+        const profileIcon = document.getElementById('userProfileIcon');
+        
+        if (u) {
+            try {
+                const s = await getDoc(doc(db, "users", u.uid));
+                userData = s.data();
+                if (userData && userData.isBanned) {
+                    await checkUserBanStatus(u.uid);
+                    return;
+                }
+                profileIcon.classList.remove('hidden');
+                document.getElementById('navUserDp').src = userData?.photo || 'https://via.placeholder.com/40';
+                guestBtn.classList.add('hidden');
+                
+                if (u.email === "admin@crowdpic.com") {
+                    adminLink.style.display = 'inline-flex';
+                    adminLink.href = "javascript:void(0)";
+                    adminLink.onclick = () => {
+                        window.open('/admin', '_blank');
+                        showFastToast("Admin panel opened");
+                    };
+                } else {
+                    adminLink.style.display = 'none';
+                }
+                
+                // Update profile if on profile page
+                if (!document.getElementById('profilePage').classList.contains('hidden')) {
+                    updateProfilePosts();
+                    updateStudioAndProfile();
+                }
+            } catch(e) {
+                console.error('Auth state error:', e);
+            }
+        } else {
+            userData = null;
+            profileIcon.classList.add('hidden');
+            guestBtn.classList.remove('hidden');
+            adminLink.style.display = 'none';
+        }
+        renderFeed();
+    });
+
+    // ============================================
+    // SCREEN NAVIGATION
+    // ============================================
+    window.showScreen = (id) => {
+        if (userData && userData.isBanned) {
+            showFastToast("Account banned", true);
+            return;
+        }
+        
+        ['landingScreen','homeScreen','uploadScreen','profilePage','studioScreen','postDetail'].forEach(s => {
+            document.getElementById(s).classList.add('hidden');
+        });
+        document.getElementById(id).classList.remove('hidden');
+        
+        if (id === 'profilePage') {
+            updateProfilePosts();
+            updateStudioAndProfile();
+        }
+        if (id === 'studioScreen') {
+            updateStudioAndProfile();
+        }
+        if (id === 'homeScreen') {
+            renderFeed(document.getElementById('globalSearch').value);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    
+    window.checkAuthAndGo = (screen) => {
+        if (!auth.currentUser) {
+            openAuthModal();
+            return;
+        }
+        if (userData && userData.isBanned) {
+            showFastToast("You are banned", true);
+            return;
+        }
+        showScreen(screen);
+    };
+
+    // ============================================
+    // PROFILE PICTURE UPLOAD
+    // ============================================
+    window.uploadProfilePicture = async (input) => {
+        if (!auth.currentUser) {
+            showFastToast("Login required", true);
+            return;
+        }
+        const file = input.files[0];
+        if (!file) return;
+        
+        showFastToast("Uploading profile picture...");
+        
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { 
+                method: 'POST', 
+                body: fd 
+            });
+            const data = await res.json();
+            const imageUrl = data.secure_url;
+            
+            await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: imageUrl });
+            userData.photo = imageUrl;
+            document.getElementById('userDp').src = imageUrl;
+            document.getElementById('navUserDp').src = imageUrl;
+            
+            // Update all user's posts with new DP
+            const postsQuery = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
+            const postsSnap = await getDocs(postsQuery);
+            for (const postDoc of postsSnap.docs) {
+                await updateDoc(doc(db, "posts", postDoc.id), { publisherDp: imageUrl });
+            }
+            
+            showFastToast("Profile picture updated! ✨");
+        } catch(e) {
+            showFastToast("Upload failed: " + e.message, true);
+        }
+        input.value = '';
+    };
+
+    // ============================================
+    // PROFILE POSTS
+    // ============================================
+    async function updateProfilePosts() {
+        if (!auth.currentUser || !userData) return;
+        
+        const postsGrid = document.getElementById('profilePostsGrid');
+        const noPostsMsg = document.getElementById('noPostsMessage');
+        postsGrid.innerHTML = '<div class="col-span-full text-center py-8"><div class="spinner mx-auto"></div></div>';
+        
+        try {
+            const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
+            const snap = await getDocs(q);
+            postsGrid.innerHTML = '';
+            
+            if (snap.empty) {
+                noPostsMsg.classList.remove('hidden');
+                return;
+            }
+            
+            noPostsMsg.classList.add('hidden');
+            const posts = [];
+            snap.forEach(docSnap => {
+                const post = docSnap.data();
+                post.id = docSnap.id;
+                posts.push(post);
+            });
+            posts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+            
+            posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'profile-post-card animate-in';
+                const optimizedUrl = optimizeCloudinaryUrl(post.url, 400, 300, false);
+                
+                postCard.innerHTML = `
+                    <button class="profile-delete-btn" onclick="event.stopPropagation(); window.deleteProfilePost('${post.id}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <img src="${optimizedUrl}" alt="${post.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Not+Found'">
+                    <div class="profile-post-info">
+                        <h4>${post.title || 'Untitled'}</h4>
+                        <div class="profile-post-stats">
+                            <span><i class="fas fa-heart text-red-400"></i> ${post.likes || 0}</span>
+                            <span><i class="fas fa-download text-blue-400"></i> ${post.downloads || 0}</span>
+                            <span><i class="fas fa-eye text-green-400"></i> ${post.impressions || 0}</span>
+                        </div>
+                    </div>
+                `;
+                postCard.addEventListener('click', (e) => {
+                    if (!e.target.closest('.profile-delete-btn')) openDetail(post);
+                });
+                postsGrid.appendChild(postCard);
+            });
+        } catch(error) {
+            console.error('Profile posts error:', error);
+            postsGrid.innerHTML = `
+                <div class="col-span-full text-center py-8 text-red-500">
+                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    <p>Error loading your posts</p>
+                </div>
+            `;
+        }
+    }
+
+    window.deleteProfilePost = async (postId) => {
+        if (!confirm("Delete this post permanently?")) return;
+        try {
+            await deleteDoc(doc(db, "posts", postId));
+            showFastToast("Post deleted successfully");
+            updateProfilePosts();
+            if (!document.getElementById('studioScreen').classList.contains('hidden')) {
+                updateStudioAndProfile();
+            }
+        } catch(e) {
+            showFastToast("Failed to delete post", true);
+        }
+    };
+
+    // ============================================
+    // STUDIO & EARNINGS
+    // ============================================
+    async function updateStudioAndProfile() {
+        if (!auth.currentUser || !userData) return;
+        
+        document.getElementById('statEarnings').textContent = userData.earnings?.toFixed(2) || "0.00";
+        document.getElementById('statDownloads').textContent = userData.downloads || 0;
+        document.getElementById('userName').textContent = userData.name || 'User';
+        document.getElementById('userDp').src = userData.photo || 'https://via.placeholder.com/112';
+        
+        try {
+            const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
+            const snap = await getDocs(q);
+            let totalLikes = 0, totalImpressions = 0;
+            snap.forEach(d => {
+                totalLikes += (d.data().likes || 0);
+                totalImpressions += (d.data().impressions || 0);
+            });
+            document.getElementById('statTotalLikes').textContent = totalLikes;
+            document.getElementById('profileImpressionsCount').textContent = totalImpressions;
+        } catch(e) {
+            console.error('Studio update error:', e);
+        }
+    }
+
+    // ============================================
+    // POST DETAIL
+    // ============================================
+    window.openDetail = async (post) => {
+        activePost = post;
+        
+        try {
+            await updateDoc(doc(db, "posts", post.id), { impressions: increment(1) });
+        } catch(e) {
+            console.error('Impression update error:', e);
+        }
+        
+        const imgElement = document.getElementById('detailImg');
+        loadImageWithSkeleton(imgElement, post.url);
+        
+        document.getElementById('detailTitle').textContent = post.title || 'Untitled';
+        document.getElementById('detailUserName').textContent = post.publisherName || 'Anonymous';
+        document.getElementById('detailUserDp').src = post.publisherDp || 'https://via.placeholder.com/48';
+        document.getElementById('detailLikes').textContent = post.likes || 0;
+        document.getElementById('detailImpressionsCount').textContent = post.impressions || 0;
+        
+        // Like button state
+        const likeBtn = document.getElementById('likeBtn');
+        if (userData && userData.likedPosts && userData.likedPosts.includes(post.id)) {
+            likeBtn.classList.add('like-active');
+        } else {
+            likeBtn.classList.remove('like-active');
+        }
+        
+        // Tags
+        const tagsDiv = document.getElementById('detailTags');
+        tagsDiv.innerHTML = '';
+        if (post.tags && post.tags.length > 0) {
+            post.tags.forEach(t => {
+                const span = document.createElement('span');
+                span.className = 'bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-purple-100 transition';
+                span.textContent = '#' + t;
+                span.onclick = (e) => {
+                    e.stopPropagation();
+                    document.getElementById('globalSearch').value = t;
+                    renderFeed(t);
+                    showScreen('homeScreen');
+                };
+                tagsDiv.appendChild(span);
+            });
+        }
+        
+        // Category
+        const categoryEl = document.getElementById('detailCategory');
+        if (post.tags && post.tags.length > 0) {
+            const firstTag = post.tags[0].toLowerCase();
+            const categoryMap = {
+                'nature': 'nature',
+                'urban': 'urban',
+                'portrait': 'portrait',
+                'food': 'food',
+                'travel': 'travel',
+                'tech': 'tech'
+            };
+            const cat = categoryMap[firstTag];
+            if (cat) {
+                categoryEl.className = `category-pill ${cat}`;
+                categoryEl.textContent = cat.toUpperCase();
+                categoryEl.classList.remove('hidden');
+            } else {
+                categoryEl.classList.add('hidden');
+            }
+        } else {
+            categoryEl.classList.add('hidden');
+        }
+        
+        showScreen('postDetail');
+    };
+
+    // ============================================
+    // LIKE TOGGLE
+    // ============================================
+    window.toggleLike = async () => {
+        if (!auth.currentUser) {
+            openAuthModal();
+            return;
+        }
+        if (!activePost) return;
+        
+        const btn = document.getElementById('likeBtn');
+        const isLiked = btn.classList.contains('like-active');
+        const likesSpan = document.getElementById('detailLikes');
+        let currentLikes = parseInt(likesSpan.textContent) || 0;
+        
+        try {
+            if (isLiked) {
+                await updateDoc(doc(db, "posts", activePost.id), { likes: increment(-1) });
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { likedPosts: arrayRemove(activePost.id) });
+                btn.classList.remove('like-active');
+                likesSpan.textContent = currentLikes - 1;
+            } else {
+                await updateDoc(doc(db, "posts", activePost.id), { likes: increment(1) });
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { likedPosts: arrayUnion(activePost.id) });
+                btn.classList.add('like-active');
+                likesSpan.textContent = currentLikes + 1;
+            }
+            const freshUser = await getDoc(doc(db, "users", auth.currentUser.uid));
+            userData = freshUser.data();
+        } catch(e) {
+            showFastToast("Error updating like", true);
+        }
+    };
+
+    // ============================================
+    // UPLOAD POST
+    // ============================================
+    window.previewUpload = (input) => {
+        if (input.files[0]) {
+            selectedFile = input.files[0];
+            const preview = document.getElementById('uploadImgPreview');
+            preview.src = URL.createObjectURL(selectedFile);
+            preview.classList.remove('hidden');
+            document.getElementById('uploadPlaceholder').classList.add('hidden');
+        }
+    };
+    
+    window.startUpload = async () => {
+        if (isUploading) return;
+        
+        const title = document.getElementById('postTitle').value.trim();
+        const tagsRaw = document.getElementById('postTags').value;
+        
+        if (!selectedFile) {
+            showFastToast("Please select a photo first", true);
+            return;
+        }
+        if (!title) {
+            showFastToast("Please add a title", true);
+            return;
+        }
+        
+        const btn = document.getElementById('postBtn');
+        isUploading = true;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse mr-2"></i> Uploading...';
+        
+        try {
+            const fd = new FormData();
+            fd.append('file', selectedFile);
+            fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
+            fd.append('folder', 'crowdpic_photos');
+            
+            const res = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { 
+                method: 'POST', 
+                body: fd 
+            });
+            const data = await res.json();
+            
+            if (!data.secure_url) {
+                throw new Error('Upload failed - no URL returned');
+            }
+            
+            const tagArray = tagsRaw.split(',').map(x => x.trim().replace(/^#/, '')).filter(x => x);
+            
+            await addDoc(collection(db, "posts"), {
+                title,
+                url: data.secure_url,
+                tags: tagArray,
+                publisherId: auth.currentUser.uid,
+                publisherName: userData.name || 'Anonymous',
+                publisherDp: userData.photo || 'https://via.placeholder.com/40',
+                likes: 0,
+                downloads: 0,
+                impressions: 0,
+                createdAt: serverTimestamp()
+            });
+            
+            showFastToast("Photo published successfully! 🎉");
+            
+            // Reset form
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postTags').value = '';
+            document.getElementById('uploadImgPreview').classList.add('hidden');
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('uploadImgPreview').src = '';
+            selectedFile = null;
+            
+            showScreen('profilePage');
+            
+        } catch(e) {
+            console.error('Upload error:', e);
+            showFastToast("Upload Error: " + e.message, true);
+        } finally {
+            isUploading = false;
+            btn.disabled = false;
+            btn.textContent = "Publish & Earn";
+        }
+    };
+
+    // ============================================
+    // DOWNLOAD FROM DETAIL
+    // ============================================
     window.triggerDirectDownload = async () => {
         if (!activePost) return;
+        
         const downloadBtn = document.getElementById('downloadDetailBtn');
         const originalText = downloadBtn.innerHTML;
         downloadBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Saving...';
         downloadBtn.disabled = true;
+        
         try {
             const response = await fetch(activePost.url);
             if (!response.ok) throw new Error('Network failed');
@@ -524,221 +1511,72 @@
             const blobUrl = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = blobUrl;
-            link.download = `CrowdPic_${activePost.title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.jpg`;
+            link.download = `CrowdPic_${activePost.title?.replace(/[^a-z0-9]/gi, '_') || 'photo'}_${Date.now()}.jpg`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+            
             await updateDoc(doc(db, "posts", activePost.id), { downloads: increment(1) });
-            await updateDoc(doc(db, "users", activePost.publisherId), { earnings: increment(0.01), downloads: increment(1) });
+            if (activePost.publisherId) {
+                await updateDoc(doc(db, "users", activePost.publisherId), { 
+                    earnings: increment(0.01), 
+                    downloads: increment(1) 
+                });
+            }
             if (auth.currentUser && auth.currentUser.uid === activePost.publisherId) {
                 const refreshUser = await getDoc(doc(db, "users", activePost.publisherId));
                 userData = refreshUser.data();
             }
+            
             showFastToast("Image saved to gallery successfully");
-        } catch (error) { showFastToast("Download failed. Please try again.", true); } 
-        finally { downloadBtn.innerHTML = originalText; downloadBtn.disabled = false; }
-    };
-
-    window.openAuthModal = () => document.getElementById('authModal').style.display = 'flex';
-    window.closeAuthModal = () => document.getElementById('authModal').style.display = 'none';
-    window.switchAuthTab = (m) => { authMode = m; document.getElementById('tabLogin').classList.toggle('active', m==='login'); document.getElementById('tabSignup').classList.toggle('active', m==='signup'); document.getElementById('nameInputGroup').classList.toggle('hidden', m==='login'); document.getElementById('authSubmitBtn').innerText = m==='login' ? 'Login' : 'Create Account'; };
-    
-    window.handleAuthSubmit = async () => {
-        const email = document.getElementById('authEmail').value;
-        const pass = document.getElementById('authPassword').value;
-        const name = document.getElementById('authName').value;
-        if(!email || !pass) return showFastToast("Email and Password required", true);
-        try {
-            if(authMode === 'signup') {
-                if(!name) return showFastToast("Full name required", true);
-                const res = await createUserWithEmailAndPassword(auth, email, pass);
-                const defaultPhoto = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff&bold=true`;
-                await setDoc(doc(db, "users", res.user.uid), { uid: res.user.uid, name, email, photo: defaultPhoto, earnings: 0, downloads: 0, likedPosts: [], totalImpressions: 0, isBanned: false });
-                showFastToast("Account created successfully");
-            } else { await signInWithEmailAndPassword(auth, email, pass); showFastToast("Login successful"); }
-            closeAuthModal();
-            showScreen('profilePage');
-        } catch(e) { showFastToast(e.message, true); }
-    };
-    
-    window.handleLogout = () => signOut(auth).then(() => { location.reload(); });
-    
-    async function checkUserBanStatus(userId) {
-        if(!userId) return false;
-        const snap = await getDoc(doc(db, "users", userId));
-        if(snap.exists() && snap.data().isBanned === true) {
-            document.getElementById('bannedOverlay').style.display = 'flex';
-            document.querySelector('main').style.opacity = '0.3';
-            document.querySelector('main').style.pointerEvents = 'none';
-            return true;
+        } catch(error) {
+            showFastToast("Download failed. Please try again.", true);
+        } finally {
+            downloadBtn.innerHTML = originalText;
+            downloadBtn.disabled = false;
         }
-        document.getElementById('bannedOverlay').style.display = 'none';
-        document.querySelector('main').style.opacity = '1';
-        document.querySelector('main').style.pointerEvents = 'auto';
-        return false;
-    }
-    
-    onAuthStateChanged(auth, async (u) => {
-        const guestBtn = document.getElementById('guestAuthBtn');
-        const adminLink = document.getElementById('adminPanelLink');
-        if(u) {
-            const s = await getDoc(doc(db, "users", u.uid));
-            userData = s.data();
-            if(userData && userData.isBanned) { await checkUserBanStatus(u.uid); return; }
-            document.getElementById('userProfileIcon').classList.remove('hidden');
-            document.getElementById('navUserDp').src = userData.photo;
-            guestBtn.classList.add('hidden');
-            if(u.email === "admin@crowdpic.com") {
-                adminLink.style.display = 'inline-flex';
-                adminLink.href = "javascript:void(0)";
-                adminLink.onclick = () => { window.open('/admin', '_blank'); showFastToast("Admin panel opened"); };
-            } else { adminLink.style.display = 'none'; }
-        } else { userData = null; document.getElementById('userProfileIcon').classList.add('hidden'); guestBtn.classList.remove('hidden'); adminLink.style.display = 'none'; }
-        renderFeed();
-    });
-
-    window.showScreen = (id) => {
-        if(userData && userData.isBanned) return showFastToast("Account banned", true);
-        ['landingScreen','homeScreen','uploadScreen','profilePage','studioScreen','postDetail'].forEach(s => document.getElementById(s).classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-        if(id === 'profilePage') updateProfilePosts();
-        if(id === 'studioScreen') updateStudioAndProfile();
-        window.scrollTo(0,0);
-    };
-    
-    window.checkAuthAndGo = (screen) => { if(!auth.currentUser) openAuthModal(); else if(userData && userData.isBanned) showFastToast("You are banned", true); else showScreen(screen); };
-
-    window.uploadProfilePicture = async (input) => {
-        if(!auth.currentUser) return showFastToast("Login required", true);
-        const file = input.files[0]; if(!file) return;
-        showFastToast("Uploading profile picture...");
-        try {
-            const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { method: 'POST', body: fd });
-            const data = await res.json();
-            const imageUrl = data.secure_url;
-            await updateDoc(doc(db, "users", auth.currentUser.uid), { photo: imageUrl });
-            userData.photo = imageUrl;
-            document.getElementById('userDp').src = imageUrl;
-            document.getElementById('navUserDp').src = imageUrl;
-            const postsQuery = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
-            const postsSnap = await getDocs(postsQuery);
-            postsSnap.forEach(async (postDoc) => { await updateDoc(doc(db, "posts", postDoc.id), { publisherDp: imageUrl }); });
-            showFastToast("Profile picture updated");
-        } catch(e) { showFastToast("Upload failed: "+e.message, true); }
-        input.value = '';
     };
 
-    async function updateProfilePosts() {
-        if(!auth.currentUser || !userData) return;
-        const postsGrid = document.getElementById('profilePostsGrid');
-        const noPostsMsg = document.getElementById('noPostsMessage');
-        postsGrid.innerHTML = '<div class="col-span-full text-center py-8"><i class="fas fa-spinner fa-pulse text-purple-500 text-3xl"></i></div>';
-        try {
-            const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
-            const snap = await getDocs(q);
-            postsGrid.innerHTML = '';
-            if(snap.empty) noPostsMsg.classList.remove('hidden');
-            else {
-                noPostsMsg.classList.add('hidden');
-                const posts = []; snap.forEach(docSnap => { const post = docSnap.data(); post.id = docSnap.id; posts.push(post); });
-                posts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-                posts.forEach(post => {
-                    const postCard = document.createElement('div'); postCard.className = 'profile-post-card';
-                    const optimizedUrl = optimizeCloudinaryUrl(post.url, 400, 300, false);
-                    postCard.innerHTML = `<button class="profile-delete-btn" onclick="event.stopPropagation(); window.deleteProfilePost('${post.id}')"><i class="fas fa-trash"></i> Delete</button><img src="${optimizedUrl}" alt="${post.title}" loading="lazy"><div class="profile-post-info"><h4>${post.title || 'Untitled'}</h4><div class="profile-post-stats"><span><i class="fas fa-heart text-red-400"></i> ${post.likes || 0}</span><span><i class="fas fa-download text-blue-400"></i> ${post.downloads || 0}</span><span><i class="fas fa-eye text-green-400"></i> ${post.impressions || 0}</span></div></div>`;
-                    postCard.addEventListener('click', (e) => { if(!e.target.closest('.profile-delete-btn')) openDetail(post); });
-                    postsGrid.appendChild(postCard);
-                });
-            }
-        } catch(error) { postsGrid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500">Error loading posts</div>'; }
-    }
-
-    window.deleteProfilePost = async (postId) => { if(confirm("Delete this post?")) { await deleteDoc(doc(db, "posts", postId)); showFastToast("Post deleted"); updateProfilePosts(); if(!document.getElementById('studioScreen').classList.contains('hidden')) updateStudioAndProfile(); } };
-    
-    async function updateStudioAndProfile() {
-        if(!auth.currentUser || !userData) return;
-        document.getElementById('statEarnings').innerText = userData.earnings?.toFixed(2) || "0.00";
-        document.getElementById('statDownloads').innerText = userData.downloads || 0;
-        document.getElementById('userName').innerText = userData.name;
-        document.getElementById('userDp').src = userData.photo;
-        const q = query(collection(db, "posts"), where("publisherId", "==", auth.currentUser.uid));
-        const snap = await getDocs(q);
-        let totalLikes = 0, totalImpressions = 0;
-        snap.forEach(d => { totalLikes += (d.data().likes || 0); totalImpressions += (d.data().impressions || 0); });
-        document.getElementById('statTotalLikes').innerText = totalLikes;
-        document.getElementById('profileImpressionsCount').innerText = totalImpressions;
-    }
-
-    window.openDetail = async (post) => {
-        activePost = post;
-        await updateDoc(doc(db, "posts", post.id), { impressions: increment(1) });
-        const updatedPostSnap = await getDoc(doc(db, "posts", post.id));
-        const freshPost = updatedPostSnap.data();
-        const imgElement = document.getElementById('detailImg');
-        loadImageWithSkeleton(imgElement, post.url);
-        document.getElementById('detailTitle').innerText = post.title || 'Untitled';
-        document.getElementById('detailUserName').innerText = post.publisherName || 'Anonymous';
-        document.getElementById('detailUserDp').src = post.publisherDp || 'https://via.placeholder.com/48';
-        document.getElementById('detailLikes').innerText = freshPost.likes || post.likes || 0;
-        document.getElementById('detailImpressionsCount').innerText = (freshPost.impressions || post.impressions || 0);
-        const likeBtn = document.getElementById('likeBtn');
-        if(userData && userData.likedPosts && userData.likedPosts.includes(post.id)) likeBtn.classList.add('like-active');
-        else likeBtn.classList.remove('like-active');
-        const tagsDiv = document.getElementById('detailTags'); tagsDiv.innerHTML = '';
-        (post.tags || []).forEach(t => { const span = document.createElement('span'); span.className = 'bg-gray-100 px-3 py-1 rounded-full text-xs cursor-pointer hover:bg-purple-100'; span.innerText = '#' + t; span.onclick = (e) => { e.stopPropagation(); renderFeed(t); showScreen('homeScreen'); }; tagsDiv.appendChild(span); });
-        showScreen('postDetail');
-    };
-
-    window.toggleLike = async () => { 
-        if(!auth.currentUser) { openAuthModal(); return; }
-        const btn = document.getElementById('likeBtn');
-        const isLiked = btn.classList.contains('like-active');
-        try {
-            if(isLiked) {
-                await updateDoc(doc(db, "posts", activePost.id), { likes: increment(-1) });
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { likedPosts: arrayRemove(activePost.id) });
-                btn.classList.remove('like-active');
-                document.getElementById('detailLikes').innerText = parseInt(document.getElementById('detailLikes').innerText) - 1;
-            } else {
-                await updateDoc(doc(db, "posts", activePost.id), { likes: increment(1) });
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { likedPosts: arrayUnion(activePost.id) });
-                btn.classList.add('like-active');
-                document.getElementById('detailLikes').innerText = parseInt(document.getElementById('detailLikes').innerText) + 1;
-            }
-            const freshUser = await getDoc(doc(db, "users", auth.currentUser.uid));
-            userData = freshUser.data();
-        } catch(e) { showFastToast("Error updating like", true); }
+    // ============================================
+    // WITHDRAW FUNCTIONS
+    // ============================================
+    window.setMethod = (m) => {
+        withdrawMethod = m;
+        document.getElementById('selEasypaisa').style.borderColor = m === 'Easypaisa' ? '#6C63FF' : '#e5e7eb';
+        document.getElementById('selJazzcash').style.borderColor = m === 'Jazzcash' ? '#6C63FF' : '#e5e7eb';
+        document.getElementById('selEasypaisa').style.background = m === 'Easypaisa' ? '#f0f0ff' : 'transparent';
+        document.getElementById('selJazzcash').style.background = m === 'Jazzcash' ? '#f0f0ff' : 'transparent';
     };
     
-    window.previewUpload = (input) => { if(input.files[0]) { selectedFile = input.files[0]; document.getElementById('uploadImgPreview').src = URL.createObjectURL(selectedFile); document.getElementById('uploadImgPreview').classList.remove('hidden'); document.getElementById('uploadPlaceholder').classList.add('hidden'); } };
-    
-    window.startUpload = async () => {
-        const title = document.getElementById('postTitle').value.trim();
-        const tagsRaw = document.getElementById('postTags').value;
-        if(!selectedFile || !title) return showFastToast("Photo and Title required", true);
-        const btn = document.getElementById('postBtn'); btn.disabled = true; btn.innerText = "Uploading...";
-        try {
-            const fd = new FormData(); fd.append('file', selectedFile); fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { method: 'POST', body: fd });
-            const data = await res.json();
-            const tagArray = tagsRaw.split(',').map(x => x.trim().replace('#','')).filter(x=>x);
-            await addDoc(collection(db, "posts"), { title, url: data.secure_url, tags: tagArray, publisherId: auth.currentUser.uid, publisherName: userData.name, publisherDp: userData.photo, likes: 0, downloads: 0, impressions: 0, createdAt: serverTimestamp() });
-            showFastToast("Photo published successfully");
-            document.getElementById('postTitle').value = ''; document.getElementById('postTags').value = ''; document.getElementById('uploadImgPreview').classList.add('hidden'); document.getElementById('uploadPlaceholder').classList.remove('hidden'); selectedFile = null;
-            showScreen('profilePage');
-        } catch(e) { showFastToast("Upload Error: "+e.message, true); } finally { btn.disabled = false; btn.innerText = "Publish & Earn"; }
-    };
-    
-    window.setMethod = (m) => { withdrawMethod = m; document.getElementById('selEasypaisa').style.borderColor = m === 'Easypaisa' ? '#6C63FF' : '#e5e7eb'; document.getElementById('selJazzcash').style.borderColor = m === 'Jazzcash' ? '#6C63FF' : '#e5e7eb'; };
-    
-    window.requestWithdraw = async () => { 
-        const name = document.getElementById('wdName').value.trim(); 
-        const num = document.getElementById('wdNumber').value.trim(); 
-        if(!withdrawMethod || !name || !num) return showFastToast("Fill all fields", true); 
-        if(!userData || userData.earnings < 30) return showFastToast("Minimum $30 required to withdraw", true); 
+    window.requestWithdraw = async () => {
+        const name = document.getElementById('wdName').value.trim();
+        const num = document.getElementById('wdNumber').value.trim();
+        
+        if (!withdrawMethod) {
+            showFastToast("Please select a payment method", true);
+            return;
+        }
+        if (!name) {
+            showFastToast("Please enter account holder name", true);
+            return;
+        }
+        if (!num || num.length < 8) {
+            showFastToast("Please enter a valid account number", true);
+            return;
+        }
+        if (!userData || userData.earnings < 30) {
+            showFastToast("Minimum $30 required to withdraw", true);
+            return;
+        }
+        
         const withdrawAmount = userData.earnings;
+        const btn = event?.target;
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+        }
+        
         try {
             await runTransaction(db, async (transaction) => {
                 const userRef = doc(db, "users", auth.currentUser.uid);
@@ -747,25 +1585,87 @@
                 const currentEarnings = userSnap.data().earnings || 0;
                 if (currentEarnings < 30) throw new Error("Insufficient funds");
                 transaction.update(userRef, { earnings: 0 });
+                
                 const withdrawRef = doc(collection(db, "withdrawRequests"));
                 transaction.set(withdrawRef, {
-                    userId: auth.currentUser.uid, userName: userData.name, method: withdrawMethod,
-                    accountHolder: name, accountNumber: num, amount: withdrawAmount,
-                    status: "pending", requestedAt: serverTimestamp(), createdAt: serverTimestamp()
+                    userId: auth.currentUser.uid,
+                    userName: userData.name,
+                    method: withdrawMethod,
+                    accountHolder: name,
+                    accountNumber: num,
+                    amount: withdrawAmount,
+                    status: "pending",
+                    requestedAt: serverTimestamp(),
+                    createdAt: serverTimestamp()
                 });
             });
+            
             userData.earnings = 0;
             await updateStudioAndProfile();
             showFastToast(`Withdrawal request submitted for $${withdrawAmount.toFixed(2)}. Earnings deducted.`);
             document.getElementById('wdName').value = '';
             document.getElementById('wdNumber').value = '';
-        } catch(e) { showFastToast("Error: " + e.message, true); }
+            withdrawMethod = '';
+            document.getElementById('selEasypaisa').style.borderColor = '#e5e7eb';
+            document.getElementById('selJazzcash').style.borderColor = '#e5e7eb';
+            document.getElementById('selEasypaisa').style.background = 'transparent';
+            document.getElementById('selJazzcash').style.background = 'transparent';
+            
+        } catch(e) {
+            showFastToast("Error: " + e.message, true);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Request Withdraw';
+            }
+        }
     };
-    
-    window.copyShareLink = () => { navigator.clipboard.writeText(window.location.href); showFastToast("Link copied"); };
-    
-    document.getElementById('globalSearch').addEventListener('input', (e) => renderFeed(e.target.value));
+
+    // ============================================
+    // SHARE
+    // ============================================
+    window.copyShareLink = () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            showFastToast("Link copied to clipboard! 📋");
+        }).catch(() => {
+            showFastToast("Share link: " + window.location.href);
+        });
+    };
+
+    // ============================================
+    // SEARCH
+    // ============================================
+    let searchTimeout = null;
+    document.getElementById('globalSearch').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            renderFeed(e.target.value);
+        }, 300);
+    });
+
+    // ============================================
+    // KEYBOARD SHORTCUTS
+    // ============================================
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+K or Cmd+K to focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('globalSearch').focus();
+        }
+        // Escape to close modal
+        if (e.key === 'Escape') {
+            if (document.getElementById('authModal').classList.contains('active')) {
+                closeAuthModal();
+            }
+        }
+    });
+
+    // ============================================
+    // INITIAL RENDER
+    // ============================================
     window.renderFeed();
+    console.log('🚀 CrowdPic - Share & Earn Photography Platform');
+    console.log('📸 Visit https://crowdpic.com to explore more');
 </script>
 </body>
 </html>
